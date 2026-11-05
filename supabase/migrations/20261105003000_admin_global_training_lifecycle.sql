@@ -134,6 +134,9 @@ ON public.client_training_plan_items FOR DELETE TO authenticated USING (
 
 -- Every authorized administrator may finish another administrator's reviewed
 -- plan, without forging who reviewed it or combining review and publication.
+-- Actor checks apply to real authenticated Data API sessions; trusted
+-- migration/test seed owners lack an auth.uid(), but must still respect the
+-- no-combined-transition invariant. No browser role receives privileged access.
 -- Existing immutable-version and item triggers remain installed and active.
 CREATE FUNCTION public.enforce_training_review_publish_actor()
 RETURNS trigger LANGUAGE plpgsql
@@ -145,12 +148,14 @@ BEGIN
       RAISE EXCEPTION 'review and publication are distinct human decisions'
         USING errcode='55000';
     END IF;
-    IF NEW.reviewed_by_profile_id IS DISTINCT FROM auth.uid() THEN
+    IF current_user = 'authenticated'
+       AND NEW.reviewed_by_profile_id IS DISTINCT FROM auth.uid() THEN
       RAISE EXCEPTION 'review actor must match verified identity'
         USING errcode='42501';
     END IF;
   END IF;
   IF OLD.published_at IS NULL AND NEW.published_at IS NOT NULL
+      AND current_user = 'authenticated'
       AND NEW.published_by_profile_id IS DISTINCT FROM auth.uid() THEN
     RAISE EXCEPTION 'publication actor must match verified identity'
       USING errcode='42501';
