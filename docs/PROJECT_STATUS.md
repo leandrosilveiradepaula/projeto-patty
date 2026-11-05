@@ -1,3 +1,13 @@
+## 2026-11-05 — MIGR-HIST-07B: leitura seletiva de valores brutos de XLSX direto (branch em validação)
+
+**Prioridade e contrato:** o input é um arquivo XLSX independente e fotos separadas, não ZIP externo. Depois do preview direto da #1087, o extrator `extractHistoricalDirectXlsxCells` recebe bytes de um XLSX, SHA-256 e impressão estrutural exatos da prévia, mais seletores explícitos de aba/coluna; retorna somente as células selecionadas com aba, coluna, linha, tipo e **valor original sem normalização**. Falhas são somente `historical_direct_xlsx_blocked`, sem nomes ou conteúdo de célula. O valor retornado pode conter dados de saúde, logo nunca deve ser usado em logs/telemetria/browser sem boundary profissional restrita. A classificação `raw_unapproved` não autoriza importação.
+
+**Teste sintético incluído:** seleção de texto e número sem acesso a outra coluna, hash/assinatura alterados, aba inválida, seletor repetido, arquivo inválido, célula repetida, fórmula, coordenada ausente, erro de célula e índice inválido de string compartilhada. O parser pré-existente executa CRC, limites e análise estrutural; sem dependência nova.
+
+**Estados:** código/fixtures na branch, PR/CI/merge a verificar no SHA exato; nenhum dado real, nenhum upload de foto, nenhuma migration, nenhuma escrita no Supabase nem liberação/homologação. **Continua faltando:** revisão humana de identidade/mapeamento e aprovações de origem, staging/persistência de anamnese, cadastro, medidas e fotos privadas, reconciliação idempotente e importação real. A prioridade de concluir esse fluxo permanece acima de outras jornadas.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-07A: entrada direta XLSX e fotos separadas (branch em desenvolvimento)
 
 **Decisão confirmada:** importação histórica recebe Excel e fotos separados; o ZIP que foi enviado anteriormente não é formato de importação do produto. A prioridade é concluir anamnese/Excel/fotos das clientes ativas e inativas antes de novas frentes funcionais, conforme issue #1008.
