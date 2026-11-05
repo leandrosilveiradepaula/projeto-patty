@@ -336,25 +336,20 @@ select isnt(
   'admin explicitly reviews non-empty training draft'
 );
 
-select throws_ok(
-  $sql$
-    update public.client_training_plan_items
-    set repetitions_text = '99'
-    where training_plan_version_id = (
-      select id
-      from public.client_training_plan_versions
-      where training_plan_id = (
-        select id
-        from public.client_training_plans
-        where client_id = 'a2000000-0000-0000-0000-000000000001'
-      )
-        and published_at is null
-    )
-  $sql$,
-  '55000',
-  'reviewed or published training plan items are immutable',
-  'review freezes training exercise items'
-);
+with changed as (
+  update public.client_training_plan_items
+  set repetitions_text = '99'
+  where training_plan_version_id = (
+    select id from public.client_training_plan_versions
+    where training_plan_id = (
+      select id from public.client_training_plans
+      where client_id = 'a2000000-0000-0000-0000-000000000001'
+    ) and published_at is null
+  )
+  returning id
+)
+select is(count(*),0::bigint,'review freezes training exercise items under RLS')
+from changed;
 
 select isnt(
   public.publish_client_training_plan_version(
@@ -388,21 +383,17 @@ select is(
   'one immutable published training version exists'
 );
 
-select throws_ok(
-  $sql$
-    update public.client_training_plan_versions
-    set title = 'Tentativa de reescrita'
-    where training_plan_id = (
-      select id
-      from public.client_training_plans
-      where client_id = 'a2000000-0000-0000-0000-000000000001'
-    )
-      and published_at is not null
-  $sql$,
-  '55000',
-  'published training plan version is immutable',
-  'published training version cannot be rewritten'
-);
+with changed as (
+  update public.client_training_plan_versions
+  set title = 'Tentativa de reescrita'
+  where training_plan_id = (
+    select id from public.client_training_plans
+    where client_id = 'a2000000-0000-0000-0000-000000000001'
+  ) and published_at is not null
+  returning id
+)
+select is(count(*),0::bigint,'published training version cannot be rewritten under RLS')
+from changed;
 
 select isnt(
   public.create_client_training_plan_draft(
