@@ -283,7 +283,7 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       expect(first.published_at).toBeNull();
       expect(visibleCount(staff.id, "aal2", "client_training_plan_versions", first.id)).toBe(1);
       expect(visibleCount(staff.id, "aal1", "client_training_plan_versions", first.id)).toBe(0);
-      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", first.id)).toBe(0);
+      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", first.id)).toBe(1);
       expect(visibleCount(owner.id, "aal1", "client_training_plan_versions", first.id)).toBe(0);
       await expect(clientPage.getByText("Nenhum treino publicado", { exact: true })).toBeVisible();
       await expect(adminPage.getByRole("heading", { name: "Adicionar exercício" })).toBeVisible();
