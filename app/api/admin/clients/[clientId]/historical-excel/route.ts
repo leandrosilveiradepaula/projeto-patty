@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/supabase/auth";
 import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
 import { isUuid } from "@/lib/validation/uuid";
+import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical-anamnesis-targets";
+import { reviewHistoricalDirectAnamnesisMapping, type HistoricalCellSelection } from "@/lib/imports/historical-direct-anamnesis-mapping";
 import {
   extractHistoricalDirectXlsxCells,
   previewHistoricalDirectFiles,
@@ -101,7 +103,9 @@ export async function POST(
     ? ["operation", "excel"]
     : operation === "cells"
       ? ["operation", "excel", "sha256", "column_signature_sha256", "sheet_index", "column_index"]
-      : [];
+      : operation === "map"
+        ? ["operation", "excel", "sha256", "column_signature_sha256", "form_version_id", "mappings"]
+        : [];
   if (allowed.length === 0 || [...form.keys()].some((key) => !allowed.includes(key))
     || allowed.some((key) => form!.getAll(key).length !== 1)) {
     return response({ error: "invalid_excel_request" }, 400);
@@ -131,16 +135,63 @@ export async function POST(
 
     const sha256 = form.get("sha256");
     const signature = form.get("column_signature_sha256");
-    const sheet = form.get("sheet_index");
-    const column = form.get("column_index");
     if (typeof sha256 !== "string" || !HASH.test(sha256)
       || typeof signature !== "string" || !HASH.test(signature)
-      || typeof sheet !== "string" || !/^(0|[1-9]\d?)$/.test(sheet)
-      || typeof column !== "string" || !/^[1-9]\d{0,4}$/.test(column)
-      || Number(column) > 16384
       || sha256 !== preview.excel.sha256
       || signature !== preview.excel.column_signature_sha256) {
       return response({ error: "excel_source_changed" }, 409);
+    }
+    if (operation === "map") {
+      const versionId = form.get("form_version_id");
+      const mappingJson = form.get("mappings");
+      if (typeof versionId !== "string" || !isUuid(versionId)
+        || typeof mappingJson !== "string" || mappingJson.length > 16_384) {
+        return response({ error: "invalid_mapping" }, 400);
+      }
+      let submitted: unknown;
+      try { submitted = JSON.parse(mappingJson); }
+      catch { return response({ error: "invalid_mapping" }, 400); }
+      if (!Array.isArray(submitted) || submitted.length < 1 || submitted.length > 64
+        || !submitted.every((item: unknown) => typeof item === "object" && item !== null
+          && !Array.isArray(item) && Object.keys(item).length === 4
+          && ["sheet_index", "column_index", "row_index", "question_id"].every((key) => Object.hasOwn(item, key)))) {
+        return response({ error: "invalid_mapping" }, 400);
+      }
+      const selections = submitted as HistoricalCellSelection[];
+      if (!selections.every((item) =>
+        Number.isSafeInteger(item.sheet_index) && item.sheet_index >= 0 && item.sheet_index < 64
+        && Number.isSafeInteger(item.column_index) && item.column_index >= 1 && item.column_index <= 16384
+        && Number.isSafeInteger(item.row_index) && item.row_index >= 1 && item.row_index <= 9999999
+        && typeof item.question_id === "string" && isUuid(item.question_id))) {
+        return response({ error: "invalid_mapping" }, 400);
+      }
+      const selectorsByColumn = new Map<string, { sheet_index: number; column_index: number }>();
+      for (const item of selections) {
+        selectorsByColumn.set(item.sheet_index + ":" + item.column_index, {
+          sheet_index: item.sheet_index, column_index: item.column_index,
+        });
+      }
+      const extracted = extractHistoricalDirectXlsxCells(
+        bytes, { sha256, column_signature_sha256: signature },
+        [...selectorsByColumn.values()],
+      );
+      const canonical = await getPublishedHistoricalAnamnesisTargets();
+      if (!canonical || canonical.form_version_id !== versionId) {
+        return response({ error: "mapping_version_changed" }, 409);
+      }
+      const reviewed = reviewHistoricalDirectAnamnesisMapping({
+        client_id: client.id, form_version_id: versionId,
+        source: { sha256, column_signature_sha256: signature },
+        cells: extracted.cells, selections, questions: canonical.questions,
+      });
+      return response(reviewed, reviewed.state === "blocked" ? 422 : 200);
+    }
+    const sheet = form.get("sheet_index");
+    const column = form.get("column_index");
+    if (typeof sheet !== "string" || !/^(0|[1-9]\d?)$/.test(sheet)
+      || typeof column !== "string" || !/^[1-9]\d{0,4}$/.test(column)
+      || Number(column) > 16384) {
+      return response({ error: "invalid_excel_request" }, 400);
     }
     const extracted = extractHistoricalDirectXlsxCells(
       bytes,
