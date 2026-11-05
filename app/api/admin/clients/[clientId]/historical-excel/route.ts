@@ -17,7 +17,7 @@ const MAX_MULTIPART_BYTES = MAX_EXCEL_BYTES + 64 * 1024;
 const MAX_REVIEW_CELLS = 40;
 const HASH = /^[0-9a-f]{64}$/;
 
-function response(payload: Record<string, unknown>, status = 200) {
+function response(payload: unknown, status = 200) {
   return NextResponse.json(payload, {
     status,
     headers: { "Cache-Control": "private, no-store, max-age=0", Pragma: "no-cache" },
