@@ -1,3 +1,15 @@
+## 2026-11-05 — Importação histórica usa Excel e fotos separados, não ZIP
+
+### DECISÃO DE PRODUTO CONFIRMADA PELO RESPONSÁVEL
+
+A entrada operacional da importação histórica de cada cliente será **um arquivo Excel independente e os arquivos de foto da mesma cliente, enviados separadamente**. O ZIP anteriormente compartilhado serviu somente para transportar um exemplo de arquivos; **não deve existir exigência de ZIP na interface ou na implementação do importador**.
+
+Após conciliação explícita de identidade e validação do significado das planilhas, os valores históricos do Excel devem alimentar as entidades corretas do sistema, preservando fonte, datas, respostas originais, avaliações e histórico, sem tratá-los como um único anexo genérico. Fotos devem ser associadas ao mesmo `client_id` e armazenadas em área privada, respeitando o domínio e os controles atuais de arquivos. O modelo é válido para clientes ativas e inativas; a importação não cria Auth/Profile/assignment, não ativa cliente inativa, não libera históricos para cliente automaticamente e não autoriza publicação de protocolos por IA.
+
+**Escopo ainda pendente:** aprovação de mapeamento semântico de cada tipo de Excel (incluindo datas/unidades); confirmação humana e auditável da identidade e da pertença das fotos; proveniência, custódia/retenção dos originais e autorização de leitura; implantação idempotente. A funcionalidade não está concluída apenas porque existe prévia estrutural.
+
+---
+
 ## 2026-11-01 — Papel admin: acesso integral aos dados profissionais da consultoria
 
 ### REGRA DE PRODUTO CONFIRMADA PELO RESPONSÁVEL (substitui restrição geral por assignment)
