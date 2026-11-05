@@ -49,7 +49,9 @@ export function prepareHistoricalInitialLoadRegistration(
     "identity_verification", "files", "xlsx_layout_groups",
     "client_groups", "input_errors", "totals",
   ]);
-  if (!isObject(value)) invalid();
+  if (!isObject(value)) {
+    throw new Error("historical_initial_load_manifest_blocked");
+  }
   if (!isUuid(batchId)
     || Object.keys(value).some((key) => !allowedPlanFields.has(key))
     || value.version !== INITIAL_LOAD_PLAN_VERSION
