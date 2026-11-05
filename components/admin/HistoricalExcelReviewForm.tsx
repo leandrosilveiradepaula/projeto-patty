@@ -31,7 +31,17 @@ type CellReview = {
   cells: RawCell[];
 };
 
-type ApiResult = Partial<SourcePreview & CellReview> & { error?: string };
+type ApiResult = {
+  state?: string;
+  persistence?: string;
+  sha256?: string;
+  column_signature_sha256?: string;
+  worksheet_count?: number;
+  cell_count?: number;
+  sample_limit?: number;
+  cells?: RawCell[];
+  error?: string;
+};
 
 export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
   const [file, setFile] = useState<File | null>(null);
