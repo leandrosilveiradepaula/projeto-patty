@@ -35,10 +35,12 @@ export function parseFamilyStageMapping(
     || mapping.form_version_id !== expected.form_version_id
     || !Array.isArray(mapping.mappings) || mapping.mappings.length < 1 || mapping.mappings.length > 64) bad();
 
+  const mappings = mapping.mappings;
+  if (!Array.isArray(mappings)) bad();
   const questionIds = new Set(expected.allowed_question_ids);
   const seenQuestions = new Set<string>();
   const seenCells = new Set<string>();
-  for (const item of mapping.mappings) {
+  for (const item of mappings) {
     if (!item || typeof item !== "object" || Array.isArray(item) || !exact(item, KEYS)) bad();
     if (!Number.isSafeInteger(item.sheet_index) || item.sheet_index < 0 || item.sheet_index >= 64
       || !Number.isSafeInteger(item.column_index) || item.column_index < 1 || item.column_index > 16384
