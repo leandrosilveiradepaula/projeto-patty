@@ -12,6 +12,7 @@ import {
   hasAccessibleProtocolPublicationForClient,
 } from "@/lib/supabase/data-access";
 import { isUuid } from "@/lib/validation/uuid";
+import { manualWeeklyFeedbackEligibility } from "@/lib/weekly-feedback/manual-request-eligibility";
 
 export type WeeklyFeedbackRequestFormState = {
   message: string | null;
@@ -51,7 +52,7 @@ export async function createWeeklyFeedbackRequestAction(
 
   if (!client) {
     return {
-      message: "Cliente não disponível para o acompanhamento atual.",
+      message: "Cliente não disponível para a sessão administrativa.",
       success: false,
     };
   }
@@ -78,10 +79,10 @@ export async function createWeeklyFeedbackRequestAction(
 
   const eligible = await hasAccessibleProtocolPublicationForClient(clientId);
 
-  if (!eligible) {
+  const requestEligibility = manualWeeklyFeedbackEligibility(client,eligible);
+  if (!requestEligibility.allowed) {
     return {
-      message:
-        "O Feedback Semanal só pode ser solicitado depois que a cliente receber o primeiro protocolo publicado.",
+      message: requestEligibility.message ?? "Solicitação indisponível para esta cliente.",
       success: false,
     };
   }
