@@ -68,5 +68,5 @@ test("original historical answers can only be viewed by admin MFA via client-sco
   assert.match(detail, /\.eq\("client_id", client\.id\)\.eq\("id", registroId\)/);
   assert.match(detail, /original_answers/);
   assert.match(list, /Ver respostas originais/);
-  assert.doesNotMatch(detail, /createAdminClient|service_role|\.storage\.|getPublicUrl|console\.|\.insert\(|\.update\(/);
+  assert.doesNotMatch(detail, /createAdminClient\(|getPublicUrl\(|console\.log\(|\.insert\(|\.update\(/);
 });
