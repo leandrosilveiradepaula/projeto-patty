@@ -4,6 +4,7 @@ import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-
 import { isUuid } from "@/lib/validation/uuid";
 import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical-anamnesis-targets";
 import { reviewHistoricalDirectAnamnesisMapping, type HistoricalCellSelection } from "@/lib/imports/historical-direct-anamnesis-mapping";
+import { stageHistoricalAnamnesisSource } from "@/lib/imports/historical-anamnesis-server";
 import {
   extractHistoricalDirectXlsxCells,
   previewHistoricalDirectFiles,
@@ -105,7 +106,9 @@ export async function POST(
       ? ["operation", "excel", "sha256", "column_signature_sha256", "sheet_index", "column_index"]
       : operation === "map"
         ? ["operation", "excel", "sha256", "column_signature_sha256", "form_version_id", "mappings"]
-        : [];
+        : operation === "stage"
+          ? ["operation", "excel", "sha256", "column_signature_sha256", "form_version_id", "mappings", "batch_id", "source_id", "confirmed_identity", "confirmed_mapping", "confirmed_custody"]
+          : [];
   if (allowed.length === 0 || [...form.keys()].some((key) => !allowed.includes(key))
     || allowed.some((key) => form!.getAll(key).length !== 1)) {
     return response({ error: "invalid_excel_request" }, 400);
@@ -141,7 +144,7 @@ export async function POST(
       || signature !== preview.excel.column_signature_sha256) {
       return response({ error: "excel_source_changed" }, 409);
     }
-    if (operation === "map") {
+    if (operation === "map" || operation === "stage") {
       const versionId = form.get("form_version_id");
       const mappingJson = form.get("mappings");
       if (typeof versionId !== "string" || !isUuid(versionId)
@@ -175,6 +178,28 @@ export async function POST(
         bytes, { sha256, column_signature_sha256: signature },
         [...selectorsByColumn.values()],
       );
+      if (operation === "stage") {
+        const batchId = form.get("batch_id");
+        const sourceId = form.get("source_id");
+        if (typeof batchId !== "string" || !isUuid(batchId)
+          || typeof sourceId !== "string" || !/^source_[0-9]{4}$/.test(sourceId)
+          || form.get("confirmed_identity") !== "true"
+          || form.get("confirmed_mapping") !== "true"
+          || form.get("confirmed_custody") !== "true") {
+          return response({ error: "historical_stage_confirmation_required" }, 400);
+        }
+        try {
+          const receipt = await stageHistoricalAnamnesisSource({
+            batchId, sourceId, clientId: client.id, excelBytes: bytes,
+            sourceSha256: sha256, layoutSha256: signature,
+            formVersionId: versionId, selections,
+            confirmedIdentity: true, confirmedMapping: true, confirmedCustody: true,
+          });
+          return response(receipt);
+        } catch {
+          return response({ error: "historical_stage_blocked" }, 422);
+        }
+      }
       const canonical = await getPublishedHistoricalAnamnesisTargets();
       if (!canonical || canonical.form_version_id !== versionId) {
         return response({ error: "mapping_version_changed" }, 409);

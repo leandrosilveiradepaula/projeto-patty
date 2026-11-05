@@ -1479,6 +1479,81 @@ export type Database = {
           },
         ]
       }
+      historical_anamnesis_imports: {
+        Row: {
+          id: string
+          batch_id: string
+          source_id: string
+          client_id: string
+          source_sha256: string
+          layout_signature_sha256: string
+          form_version_id: string
+          proposal_sha256: string
+          storage_path: string
+          original_answers: Json
+          mapping_snapshot: Json
+          confirmed_identity: boolean
+          confirmed_mapping: boolean
+          confirmed_custody: boolean
+          imported_by_profile_id: string
+          state: string
+          imported_at: string
+        }
+        Insert: {
+          id?: string
+          batch_id: string
+          source_id: string
+          client_id: string
+          source_sha256: string
+          layout_signature_sha256: string
+          form_version_id: string
+          proposal_sha256: string
+          storage_path: string
+          original_answers: Json
+          mapping_snapshot: Json
+          confirmed_identity: boolean
+          confirmed_mapping: boolean
+          confirmed_custody: boolean
+          imported_by_profile_id: string
+          state?: string
+          imported_at?: string
+        }
+        Update: {
+          id?: string
+          batch_id?: string
+          source_id?: string
+          client_id?: string
+          source_sha256?: string
+          layout_signature_sha256?: string
+          form_version_id?: string
+          proposal_sha256?: string
+          storage_path?: string
+          original_answers?: Json
+          mapping_snapshot?: Json
+          confirmed_identity?: boolean
+          confirmed_mapping?: boolean
+          confirmed_custody?: boolean
+          imported_by_profile_id?: string
+          state?: string
+          imported_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_anamnesis_imports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historical_anamnesis_imports_form_version_id_fkey"
+            columns: ["form_version_id"]
+            isOneToOne: false
+            referencedRelation: "anamnesis_form_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historical_initial_load_batches: {
         Row: {
           id: string
@@ -3602,6 +3677,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      stage_historical_anamnesis_source: {
+        Args: {
+          p_batch_id: string
+          p_source_id: string
+          p_client_id: string
+          p_source_sha256: string
+          p_layout_signature_sha256: string
+          p_form_version_id: string
+          p_proposal_sha256: string
+          p_storage_path: string
+          p_mapping_snapshot: Json
+          p_original_answers: Json
+          p_actor_profile_id: string
+          p_confirmed_identity: boolean
+          p_confirmed_mapping: boolean
+          p_confirmed_custody: boolean
+        }
+        Returns: string
+      }
       register_historical_initial_load_manifest: {
         Args: {
           p_batch_id: string
