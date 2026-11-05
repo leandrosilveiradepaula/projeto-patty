@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
 import { isUuid } from "@/lib/validation/uuid";
+import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical-anamnesis-targets";
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { HistoricalExcelReviewForm } from "@/components/admin/HistoricalExcelReviewForm";
@@ -21,6 +22,7 @@ export default async function HistoricalClientImportPage({
   if (!client) notFound();
 
   const name = client.full_name?.trim() || client.profiles?.display_name?.trim();
+  const publishedAnamnesis = await getPublishedHistoricalAnamnesisTargets();
 
   return (
     <>
@@ -36,7 +38,7 @@ export default async function HistoricalClientImportPage({
         envio privado já está disponível abaixo e não faz liberação automática.
       </Alert>
       <Section title="1. Conferir Excel da cliente" description="Selecione um arquivo .xlsx diretamente. Os valores serão exibidos apenas para conferência e não serão salvos.">
-        <HistoricalExcelReviewForm clientId={client.id} />
+        <HistoricalExcelReviewForm clientId={client.id} targets={publishedAnamnesis} />
       </Section>
       <Section title="2. Adicionar fotos à cliente" description="Escolha a categoria Foto. Cada imagem enviada fica vinculada a este cadastro interno, inclusive se a cliente estiver inativa. O envio é individual e mantém os arquivos ocultos até liberação explícita.">
         <AdminPrivateFileUploadForm clientId={client.id} />

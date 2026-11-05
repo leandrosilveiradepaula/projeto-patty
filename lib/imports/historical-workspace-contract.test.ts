@@ -16,7 +16,7 @@ const nav = read("components/admin/ClientWorkspaceNav.tsx");
 test("client import workspace requires authenticated client-scoped backend and direct Excel", () => {
   assert.match(page, /getClientForPrivateFileAdministration\(clienteId\)/);
   assert.match(page, /if \(!client\) notFound\(\)/);
-  assert.match(page, /HistoricalExcelReviewForm clientId=\{client\.id\}/);
+  assert.match(page, /HistoricalExcelReviewForm clientId=\{client\.id\} targets=\{publishedAnamnesis\}/);
   assert.match(page, /AdminPrivateFileUploadForm clientId=\{client\.id\}/);
   assert.match(nav, /href: \x60\$\{base\}\/importacao\x60/);
   assert.match(page, /Não.*ZIP|sem ZIP/i);
@@ -38,6 +38,9 @@ test("historical Excel route authenticates MFA before bounded raw upload and nev
   assert.match(api, /MAX_REVIEW_CELLS = 40/);
   assert.match(api, /sha256 !== preview\.excel\.sha256/);
   assert.match(api, /"raw_unapproved"/);
+  assert.match(api, /reviewHistoricalDirectAnamnesisMapping/);
+  assert.match(api, /getPublishedHistoricalAnamnesisTargets/);
+  assert.match(api, /"pending_professional_review"/);
   assert.doesNotMatch(api, /console\.|\.insert\(|\.update\(|\.upsert\(|\.upload\(|createAdminClient|service_role|\.storage\./);
 });
 

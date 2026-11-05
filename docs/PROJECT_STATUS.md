@@ -1,3 +1,17 @@
+## 2026-11-05 — MIGR-HIST-07D: proposta explícita Excel → perguntas da Anamnese (branch em CI)
+
+**Regra confirmada:** importação direta de XLSX e fotos como arquivos separados por `client_id`, sem ZIP externo. Fotos seguem Storage privado da cliente. Esta etapa diz respeito ao mapeamento do Excel; não cria nem simula resposta da cliente ao questionário atual.
+
+**Avanço funcional implementado:** na página `/admin/clientes/[clienteId]/importacao`, o administrador AAL2 seleciona uma célula original já lida do Excel e escolhe **manualmente** uma pergunta de destino da versão canônica atualmente publicada da Anamnese, carregada via sessão/RLS no backend; pode acumular até 64 correspondências distintas, removê-las e enviar a proposta para validação. Não existe mapeamento automático por nome de planilha/cabeçalho, nem diagnóstico, escore ou inferência de consentimento. O endpoint existente de XLSX acrescenta somente `operation=map`: revalida `client_id`, hash de bytes do Excel, assinatura estrutural, coordenadas e versão exata atual, extrai os valores originais no servidor e valida compatibilidade dos campos `text`/`single_choice`. Rejeita destinos duplicados, células ausentes, fórmulas, opções não reconhecidas e `consent_acceptance`. Retorna apenas estado `pending_professional_review`, quantidade e SHA-256 canônico, sem dados de saúde, persistência ou aprovação.
+
+**Segurança:** mesma role relacional admin/AAL2, RLS, Origin/Fetch Metadata, limite de multipart, `no-store` da #1089; não há novo entrypoint ou nova migration. Valores do Excel continuam apenas na memória do navegador/servidor durante a conferência. O destino selecionado é pergunta da versão publicada e não a interpretação de um exemplo histórico. Nenhum dado importado em `anamnesis_submissions`, que permanece reservado às submissões reais do aplicativo; não inventar anuência retrospectiva.
+
+**Estados:** implementação e testes sintéticos commitados em branch; CI, PR e merge dependem de verificação. Supabase/Storage/dados reais não alterados por essa etapa; homologação e importação histórica canônica ainda não concluídas.
+
+**Próxima entrega obrigatória — MIGR-HIST-07E:** persistência histórico-legado **distinta** de Anamnese atual, com identidade e mapeamento aprovados, origens/proveniência, aprovação auditada, deduplicação transacional/idempotência, leitura profissional e isolamento privado; depois progressivamente Cadastro Atual, Avaliações e fotos individuais conforme decisões profissionais. Não mudar a ordem de prioridade. Homologação J1–J7 continua última.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-07C: workspace de importação por cliente — Excel + fotos (PR em validação)
 
 **Decisão vigente:** o arquivo Excel e as fotos são entradas separadas; o ZIP de exemplo não é formato do importador. Importação histórica mantém prioridade exclusiva até finalização, incluindo Anamnese e planilhas das clientes ativas/inativas.
