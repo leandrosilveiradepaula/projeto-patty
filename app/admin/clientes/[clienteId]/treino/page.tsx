@@ -11,6 +11,7 @@ import { compareTrainingVersions, paginateTrainingRequests, trainingRequestHisto
 import Link from "next/link";
 import { Alert } from "@/components/ui/Alert";
 import { publishedTrainingVersions } from "@/lib/training/published-versions";
+import { trainingPublicationEligibility } from "@/lib/training/publication-eligibility";
 import { ClientHistoryDisclosure } from "@/components/client/ClientHistoryDisclosure";
 import { isTrainingRequestAfterPublication } from "@/lib/training/request-follow-up";
 import { trainingRequestOriginLabel } from "@/lib/training/request-origin";
@@ -88,6 +89,7 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
     notFound();
   }
 
+  const publicationEligibility = trainingPublicationEligibility(client);
   const [requests, plan] = await Promise.all([
     listAccessibleClientTrainingRequests(client.id),
     getAccessibleClientTrainingPlan(client.id),
@@ -420,12 +422,18 @@ export default async function AdminClientTrainingPage({ params, searchParams }: 
                     cliente. Nenhuma IA ou automação publica por conta própria.
                   </p>
                 </div>
-                <AdminTrainingPlanLifecycleAction
-                  clientId={client.id}
-                  mode="publish"
-                  trainingPlanVersionId={openVersion.id}
-                  versionNumber={openVersion.version_number}
-                />
+                {publicationEligibility.allowed ? (
+                  <AdminTrainingPlanLifecycleAction
+                    clientId={client.id}
+                    mode="publish"
+                    trainingPlanVersionId={openVersion.id}
+                    versionNumber={openVersion.version_number}
+                  />
+                ) : (
+                  <Alert title="Publicação indisponível" variant="warning">
+                    {publicationEligibility.message}
+                  </Alert>
+                )}
               </Card>
             )}
           </div>
