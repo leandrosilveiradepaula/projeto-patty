@@ -1,3 +1,21 @@
+## 2026-11-05 — Carga inicial integral de todo o acervo da consultoria
+
+### REGRA DE PRODUTO CONFIRMADA PELO RESPONSÁVEL — PREVALECE SOBRE INTERPRETAÇÃO DE IMPORTAÇÃO PONTUAL
+
+O Corpo & Mente está vazio e precisa receber **uma carga inicial de todos os dados históricos guardados pela consultoria**: todas as planilhas Excel de clientes **ativas e inativas**, mais as fotos individuais correspondentes. O ZIP enviado anteriormente foi somente transporte de amostra: **não** será um arquivo ZIP de importação. O objetivo final é popular efetivamente os cadastros, anamneses históricas e demais entidades correspondentes com o conteúdo das fontes, e guardar as fotos privadas por `client_id`.
+
+O processo **não é principalmente uma ferramenta manual de um Excel por cliente**. A estratégia técnica deve inventariar o universo completo e usar **mapeamento reutilizável por família de layout**, validado pela responsável, tratamento em lote, reconciliação de identidades e arquivos, idempotência por fonte e destino e conferência de totais de arquivos e registros importados/pendentes. Sem inferir relações por nomes, e-mails, pastas ou hashes, nem confundir status de acompanhamento com identidade de login. Pessoas históricas inativas podem manter `Client` canônico sem Auth/Profile; reativação/login/cadastro continuam fluxos separados.
+
+**Critério de conclusão:** todos os arquivos do acervo disponibilizado e autorizado devem ser **importados efetivamente e reconciliados**, ou permanecer numa lista explícita de pendências/rejeições com motivo auditável e decisão humana. Códigos de prévia e mapeamento, PRs mergeadas e CI verde **não** equivalem a carga concluída.
+
+**Gates humanos que permanecem:** base legal/custódia/retenção dos originais e fotos; confirmação de identidade e vinculação ao `client_id`; significado das colunas/unidades/datas de cada modelo; autorização das importações e de visibilidade à cliente. Nenhuma resposta antiga deve ser lançada como submissão atual com consentimento supostamente prestado. Não expor dados de saúde em código, prompts, logs ou testes.
+
+**Desenho técnico incremental escolhido:** MIGR-HIST-08A cria inventário determinístico, exclusivamente offline/sem escrita, de `excel/*.xlsx` e `fotos/*.{jpg,jpeg,png}`, com hashes e famílias de layout. Os pacotes seguintes devem concretizar staging seguro/ledger, mapeamentos por família e a **carga real** por domínio, com controles e validação. A prévia 08A não importa registros.
+
+Registro da decisão: [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6649422399).
+
+---
+
 ## 2026-11-05 — Importação histórica usa Excel e fotos separados, não ZIP
 
 ### DECISÃO DE PRODUTO CONFIRMADA PELO RESPONSÁVEL
