@@ -1,3 +1,13 @@
+## 2026-11-05 — MIGR-HIST-07A: entrada direta XLSX e fotos separadas (branch em desenvolvimento)
+
+**Decisão confirmada:** importação histórica recebe Excel e fotos separados; o ZIP que foi enviado anteriormente não é formato de importação do produto. A prioridade é concluir anamnese/Excel/fotos das clientes ativas e inativas antes de novas frentes funcionais, conforme issue #1008.
+
+**Primeira entrega técnica proposta:** `previewHistoricalDirectFiles` aceita bytes de XLSX independente e uma lista de fotos JPEG/PNG separadas; reusa a inspeção estruturada e limitada do XLSX para retornar somente hash, assinatura estrutural, número de abas e candidatos de foto por hash/tipo, sem nomes, conteúdo de células, uploads, dados de cliente, gravação ou aprovação. As fotos são apenas candidatos por assinatura básica; sua validade e titularidade não estão demonstradas. Testes usam fixtures sintéticas e bloqueiam ZIP externo, conteúdo inválido, duplicatas e excesso de fotos. Não há UI de importação nem extração/persistência de células ainda.
+
+**Estados:** branch criada, implementação e testes sintéticos adicionados; CI e PR/merge dependem de verificação; nenhuma migration nova, nenhum dado real utilizado, Supabase/Vercel/homologação sem operação nesta entrega. **Não confundir prévia com importador funcional concluído**. Próximos lotes sob a mesma prioridade: extrair células originais do XLSX direto, obter mapeamento de origem e revisão humana, vincular a Client por decisão auditável, persistir registros canônicos e fotos privadas com reconciliação/idempotência e provar importação real autorizada por lote.
+
+---
+
 ## 2026-11-05 — J2-ADMIN-MANUAL-FEEDBACK-01: solicitação manual sem assignment com destino elegível (PR em validação)
 
 **Fato e regra confirmada:** a role administrativa com MFA AAL2 pode gerir todas as clientes sem depender de assignment, conforme `DECISIONS.md` 2026-11-01. O painel J2 já mostrava registros históricos por `admin_global_select_aal2`, mas `client_weekly_feedbacks` ainda exigia assignment ativo para INSERT manual, tornando impossível a solicitação por administradores autorizados sem assignment. Uma cliente inativa/sem Profile podia ter protocolo publicado histórico e aparecia com botão de solicitação que não deveria gerar uma nova tarefa para ela.
