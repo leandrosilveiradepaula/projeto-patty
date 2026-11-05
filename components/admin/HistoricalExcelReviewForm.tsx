@@ -61,6 +61,9 @@ type ApiResult = {
   approval?: string;
   proposed_answer_count?: number;
   proposal_sha256?: string;
+  import_id?: string;
+  source_id?: string;
+  answer_count?: number;
 };
 
 export function HistoricalExcelReviewForm({ clientId, targets }: {
@@ -79,6 +82,11 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
   const [selectedRow, setSelectedRow] = useState(0);
   const [selectedQuestion, setSelectedQuestion] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [batchId, setBatchId] = useState("");
+  const [sourceId, setSourceId] = useState("");
+  const [mappingConfirmed, setMappingConfirmed] = useState(false);
+  const [custodyConfirmed, setCustodyConfirmed] = useState(false);
+  const [stagedReceipt, setStagedReceipt] = useState<string | null>(null);
 
   const fileValid = file !== null && file.size > 0 && file.size <= MAX_EXCEL_BYTES
     && /\.xlsx$/i.test(file.name);
@@ -95,9 +103,14 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
     setMapped(null);
     setSelectedRow(0);
     setSelectedQuestion("");
+    setBatchId("");
+    setSourceId("");
+    setMappingConfirmed(false);
+    setCustodyConfirmed(false);
+    setStagedReceipt(null);
   }
 
-  async function send(operation: "inspect" | "cells" | "map") {
+  async function send(operation: "inspect" | "cells" | "map" | "stage") {
     if (pending || !identityConfirmed || !fileValid || !file) return;
     if (operation === "cells" && (!preview || !Number.isSafeInteger(sheetIndex)
       || sheetIndex < 0 || sheetIndex >= preview.worksheet_count
@@ -105,13 +118,19 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
       setMessage("Confira a aba e a coluna antes de consultar valores.");
       return;
     }
-    if (operation === "map" && (!preview || !targets || mappings.length === 0)) {
+    if ((operation === "map" || operation === "stage") && (!preview || !targets || mappings.length === 0)) {
       setMessage("Escolha ao menos uma resposta e um campo de destino para conferir o mapeamento.");
+      return;
+    }
+    if (operation === "stage" && (!mapped || !identityConfirmed || !mappingConfirmed || !custodyConfirmed
+      || !/^[0-9a-f-]{36}$/i.test(batchId) || !/^source_[0-9]{4}$/.test(sourceId))) {
+      setMessage("Para guardar o histórico é necessário conferir lote, origem, identidade, mapeamento e guarda do arquivo.");
       return;
     }
     setPending(true);
     setMessage(null);
-    setMapped(null);
+    if (operation !== "stage") setMapped(null);
+    setStagedReceipt(null);
     if (operation === "inspect") {
       setPreview(null);
       setReview(null);
@@ -121,13 +140,20 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
     const data = new FormData();
     data.set("operation", operation);
     data.set("excel", file);
-    if ((operation === "cells" || operation === "map") && preview) {
+    if ((operation === "cells" || operation === "map" || operation === "stage") && preview) {
       data.set("sha256", preview.sha256);
       data.set("column_signature_sha256", preview.column_signature_sha256);
       if (operation === "cells") {
         data.set("sheet_index", String(sheetIndex));
         data.set("column_index", String(columnIndex));
       } else if (targets) {
+        if (operation === "stage") {
+          data.set("batch_id", batchId);
+          data.set("source_id", sourceId);
+          data.set("confirmed_identity", String(identityConfirmed));
+          data.set("confirmed_mapping", String(mappingConfirmed));
+          data.set("confirmed_custody", String(custodyConfirmed));
+        }
         data.set("form_version_id", targets.form_version_id);
         data.set("mappings", JSON.stringify(mappings.map(({ sheet_index, column_index, row_index, question_id }) => ({
           sheet_index, column_index, row_index, question_id,
@@ -166,6 +192,13 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
         }
         setReview(json as CellReview);
         setSelectedRow(json.cells[0]?.row_index ?? 0);
+      } else if (operation === "stage") {
+        if (json.state !== "staged_private" || typeof json.import_id !== "string"
+          || json.source_id !== sourceId || json.answer_count !== mappings.length) {
+          setMessage("A guarda privada não foi confirmada. Não considere o histórico importado.");
+          return;
+        }
+        setStagedReceipt(json.import_id);
       } else {
         if (json.state !== "pending_professional_review"
           || json.persistence !== "none" || json.approval !== "human_required"
@@ -195,6 +228,8 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
       setMessage("Esta célula ou pergunta já foi escolhida, ou o limite de 64 correspondências foi atingido.");
       return;
     }
+    setMappingConfirmed(false);
+    setStagedReceipt(null);
     setMappings((current) => [...current, {
       sheet_index: cell.sheet_index, column_index: cell.column_index,
       row_index: cell.row_index, question_id: selectedQuestion, raw_value: cell.raw_value,
@@ -230,6 +265,9 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
             setReview(null);
             setMappings([]);
             setMapped(null);
+            setMappingConfirmed(false);
+            setCustodyConfirmed(false);
+            setStagedReceipt(null);
           }} />
         <span>Conferi que esta planilha pertence à cliente identificada no topo da página. Sei que nomes semelhantes não comprovam identidade.</span>
       </label>
@@ -364,10 +402,42 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
               {mapped.proposed_answer_count} correspondência(s) estruturalmente válidas. Protocolo de integridade: <code>{mapped.proposal_sha256.slice(0, 16)}</code>… Nenhuma resposta foi gravada.
             </Alert>
           ) : null}
+          {mapped ? (
+            <div className={styles.preview}>
+              <strong>Guardar Anamnese histórica privada</strong>
+              <p>Esta etapa só funciona para uma origem Excel já registrada no inventário global e associada explicitamente a esta cliente. A associação no inventário é uma proposta e precisa de conferência humana.</p>
+              <FormField id="historical-batch-id" label="ID do lote registrado (UUID)">
+                {(props) => <input {...props} className={styles.number} type="text" autoComplete="off"
+                  value={batchId} disabled={pending} onChange={(e) => setBatchId(e.target.value.trim())}
+                  placeholder="UUID do lote" />}
+              </FormField>
+              <FormField id="historical-source-id" label="ID da origem Excel no lote">
+                {(props) => <input {...props} className={styles.number} type="text" autoComplete="off"
+                  value={sourceId} disabled={pending} onChange={(e) => setSourceId(e.target.value.trim())}
+                  placeholder="source_0001" />}
+              </FormField>
+              <label className={styles.confirmation}>
+                <input type="checkbox" checked={mappingConfirmed} disabled={pending}
+                  onChange={(e) => setMappingConfirmed(e.target.checked)} />
+                <span>Conferi profissionalmente a interpretação de cada célula, a pergunta de destino e a versão da Anamnese. Não estou declarando um consentimento passado.</span>
+              </label>
+              <label className={styles.confirmation}>
+                <input type="checkbox" checked={custodyConfirmed} disabled={pending}
+                  onChange={(e) => setCustodyConfirmed(e.target.checked)} />
+                <span>Conferi a autorização, proveniência e guarda privada do arquivo original. Entendo que o histórico ficará apenas na área profissional.</span>
+              </label>
+              <Button type="button" loading={pending} disabled={pending || !identityConfirmed
+                || !mappingConfirmed || !custodyConfirmed || !batchId || !sourceId}
+                onClick={() => void send("stage")}>Guardar histórico privado revisado</Button>
+              {stagedReceipt ? <Alert variant="info" live="polite" title="Histórico guardado na área privada">
+                {mappings.length} resposta(s) originais preservadas. Registro: <code>{stagedReceipt}</code>. Não foi publicada nenhuma Anamnese à cliente.
+              </Alert> : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
       <p className={styles.notice}>
-        O Excel não é armazenado nesta etapa. Não substitui respostas originais, não ativa a cliente e não libera informações para a cliente.
+        Antes da guarda privada, o Excel permanece apenas na memória da conferência. Um histórico guardado é separado de submissões atuais, não ativa a cliente e não libera informações ao portal.
       </p>
     </div>
   );
