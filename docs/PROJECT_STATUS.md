@@ -1,3 +1,15 @@
+## 2026-11-05 — MIGR-HIST-08D: aplicação de um mapeamento por família XLSX em lote (PR em validação)
+
+**Dependência operacional resolvida:** migration `20261105043500_historical_initial_load_ledger.sql` **aplicada e verificada** no Supabase SaaS pelo workflow protegido `mode=apply / confirmation=APPLY` [#42022033938](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/42022033938). Não reaplicar essa migration. PR #1093 já mergeada e a interface administrativa pode consultar metadados do ledger via sessão e RLS. Isso ainda NÃO significa que um Excel ou foto real tenha sido importado.
+
+**Entrega 08D em branch:** `reviewHistoricalFamilyBatch` aceita um mapa estrutural único e versionado (aba/coluna/linha → `question_id` de Anamnese) e vários arquivos XLSX independentes da **mesma família de layout**. Revalida SHA do arquivo original e fingerprint da estrutura em cada fonte, extrai somente coordenadas declaradas e reaproveita o validador de Anamnese canônica (inclusive bloqueio de `consent_acceptance`, duplicatas e respostas incompatíveis). Resultados por origem opaca explicitam `blocked`, `pending_human_association` ou `pending_professional_review`, sem descartar arquivos e sem retornar qualquer valor de saúde, nome ou path. A proposta contém hash canônico, não cria aprovação, não envia dados à IA e não grava nada em Supabase/Storage. Limites 1200 arquivos, 20 MiB por XLSX e 300 MiB por lote de prévia em memória. Casos maiores ainda exigem divisão controlada da carga em lotes e reconciliação global; isso não é uma limitação do acervo autorizado como um todo.
+
+**Testes sintéticos:** duas clientes com arquivos de mesmo layout/valores diferentes, ordem de entrada, hash diferente, layout divergente, ausência de Client, duplicata binária, célula ausente, consentimento jurídico e mapeamento inválido. Nenhum dado real no repo/CI. Estados de CI/PR/merge devem ser comprovados no SHA final, sem confundir código e importação.
+
+**Próxima tarefa única obrigatória:** custódia/associação humana verificada, armazenamento histórico privado separado das submissões atuais, gravação real idempotente em entidades corretas e fotos privadas no `Client` com reconciliação total. Homologação geral continua por último.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-08C: consulta paginada de lotes e fontes para reconciliação (PR em validação)
 
 **Prioridade:** carga inicial de TODO o acervo de Excel e fotos de clientes ativas e inativas. A PR #1092 foi mergeada com CI de aplicação, pgTAP/RLS e onboarding verdes no SHA final. A migration `20261105043500_historical_initial_load_ledger.sql` ainda depende de **apply explícito** via workflow protegido de produção; o `push` em `master` fez apenas o dry-run. Sem migration aplicada, a página deverá informar que os lotes não estão disponíveis, sem alegar gravação de dados reais.
