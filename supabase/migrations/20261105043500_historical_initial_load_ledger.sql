@@ -196,8 +196,10 @@ BEGIN
   SELECT manifest_sha256, manifest_metadata, created_by_profile_id, source_count
     INTO v_existing
     FROM public.historical_initial_load_batches
-    WHERE id = p_batch_id
-    FOR UPDATE;
+    WHERE id = p_batch_id;
+  -- The preceding advisory transaction lock serializes this batch UUID.
+  -- Deliberately avoid SELECT FOR UPDATE, which would require UPDATE grants
+  -- and weaken the append-only service-role ledger boundary.
   IF FOUND THEN
     IF v_existing.manifest_sha256 = p_manifest_sha256
        AND v_existing.manifest_metadata = p_sources
