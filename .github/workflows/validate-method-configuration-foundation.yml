@@ -146,6 +146,9 @@ jobs:
       - name: Run admin global nutrition human lifecycle pgTAP
         run: npx supabase test db supabase/tests/database/admin_global_nutrition_human_lifecycle.test.sql
 
+      - name: Run admin global training lifecycle pgTAP
+        run: npx supabase test db supabase/tests/database/admin_global_training_lifecycle.test.sql
+
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup
