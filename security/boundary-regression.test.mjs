@@ -33,6 +33,7 @@ const ENTRYPOINT_RULES = new Map([
   ["app/admin/exercicios/videos/[videoId]/route.ts", "admin"],
   ["app/admin/fotos/[fileId]/route.ts", "admin"],
   ["app/admin/protocolos/[protocoloId]/actions.ts", "admin"],
+  ["app/api/admin/clients/[clientId]/historical-excel/route.ts", "admin"],
   ["app/api/cron/private-file-upload-cleanup/route.ts", "public-infrastructure"],
   ["app/api/cron/weekly-feedback-email-delivery/route.ts", "public-infrastructure"],
   ["app/ativar-conta/actions.ts", "authenticated-activation"],
