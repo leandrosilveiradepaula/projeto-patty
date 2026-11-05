@@ -1,3 +1,19 @@
+## 2026-11-05 — MIGR-HIST-08B: ledger idempotente da carga inicial (PR/CI SQL pendentes)
+
+**Objetivo e prioridade vigentes:** executar a carga inicial de todo o acervo Excel + fotos, separado por fontes e associando a clientes ativas/inativas apenas após revisão, sem ZIP externo. A prévia global 08A foi integrada na PR #1091; o ledger 08B não é ainda importação de dados clínicos.
+
+**Implementação em branch:** nova migration append-only com `historical_initial_load_batches` e `historical_initial_load_sources`, manifesto de metadados opacos, `client_id` apenas como proposta de associação, hash, assinatura de layout, estados de revisão, autor e timestamp. RLS e `SELECT` administrativo limitados ao papel relacional admin com MFA AAL2; `anon` não possui privilégios; `authenticated` não pode inserir, editar ou excluir. Um RPC `SECURITY INVOKER` de uso exclusivo `service_role` recebe manifesto completo e faz registro atômico e idempotente por `batch_id`, rejeitando conflitos, campos inesperados, fontes duplicadas e clientes inexistentes. Permanece `pending_review`, sem caminho de aprovação/ativação/publicação na migration.
+
+**Integração de execução:** `prepareHistoricalInitialLoadRegistration` valida o inventário global, remove campos não autorizados, verifica inconsistências e calcula hash estável. A nova rota POST `/api/admin/imports/initial-load` exige admin + AAL2 antes de ler o corpo, verifica mesma origem, limite de stream de 1 MiB e entrega o manifesto apenas ao helper server-only autenticado. O corpo e arquivos de origem não são impressos. Nenhuma resposta de anamnese, exame, foto ou outro conteúdo pessoal deve entrar no ledger. O relatório retornado é exclusivamente um recibo de lote `pending_review`.
+
+**Testes:** unitários com fixtures 100% sintéticas, contrato de boundary e pgTAP com RLS/admin AAL2, cliente, anon, proibição de escrita do browser, idempotência, conflito, invalidade e ausência de efeitos em `Client`. O pgTAP novo foi incluído no workflow existente `Validate method configuration foundation` com Supabase descartável; esse workflow também deve executar o reset completo com migrations novas. **DDL/RLS/workflow são arquivos sensíveis:** revisão específica e CI no SHA final são necessárias. Não aplicar SQL manualmente no Supabase de produção, não alterar migrations anteriores nem pular gates.
+
+**Estados:** arquivos e testes implementados na branch; typecheck/testes/pgTAP CI e PR ainda dependem de confirmação; migration **não aplicada em produção**; nenhuma carga real ou publicação executada. O ambiente local desta conversa não dispõe de Supabase CLI/Docker/Postgres executável, logo a prova SQL deve vir da CI descartável. O arquivo de migration foi criado como novo arquivo versionado por GitHub, sem alterar histórico aplicado.
+
+**Próximo passo único após 08B:** ler lotes e resolver staging com confirmação autorizada de identidade + mapeamento por família de Excel e custódia dos originais; implementar importação canônica histórica com idempotência e fotos privadas, reconciliar 100% do acervo real. Homologação humana J1–J7 continua a última tarefa.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-08A: planejamento executável da CARGA INICIAL em lote (branch em validação)
 
 **Regra de produto confirmada:** o sistema Corpo & Mente está vazio e deve receber a carga inicial de todo o acervo da consultoria (todas as planilhas Excel e fotos de clientes ativas e inativas). ZIP anterior foi só transporte; entrada do importador são arquivos XLSX e fotos **separados**. A importação total fica à frente de todas as demais jornadas até execução e reconciliação.
