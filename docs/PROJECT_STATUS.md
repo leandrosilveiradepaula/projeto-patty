@@ -1,3 +1,13 @@
+## 2026-11-05 — MIGR-HIST-08A: planejamento executável da CARGA INICIAL em lote (branch em validação)
+
+**Regra de produto confirmada:** o sistema Corpo & Mente está vazio e deve receber a carga inicial de todo o acervo da consultoria (todas as planilhas Excel e fotos de clientes ativas e inativas). ZIP anterior foi só transporte; entrada do importador são arquivos XLSX e fotos **separados**. A importação total fica à frente de todas as demais jornadas até execução e reconciliação.
+
+**Entrega técnica 08A:** novo `planHistoricalInitialLoad` inventaria uma coleção inteira de arquivos XLSX/fotos por bytes, com limites, hashes opacos e agrupamento por assinatura estrutural do Excel. Detecta duplicatas binárias, fontes inválidas, lacunas de associação por Client e conflitos de decisões humanas. Arquivos com `client_id` explicitamente indicado permanecem `pending_backend_identity_verification` e nunca são marcados como importados. O comando local `node --experimental-strip-types scripts/plan-historical-initial-load.ts <pasta>` lê somente `excel/*.xlsx` e `fotos/*.{jpg,jpeg,png}`, sem ZIP, subpastas internas ou symlinks; falha fechada para outros arquivos e limites. Opcional `[decisoes.json]` contém exclusivamente `sha256` e `client_id`, sem PII em log. Saída JSON determinística inclui totais de fontes válidas, bloqueadas, duplicadas, por layouts e pendências. Dados brutos nunca aparecem no relatório; processamento somente offline, read-only, sem banco, Storage, rede ou geração de contas.
+
+**Estado:** implementação/testes sintéticos versionados na branch; CI, PR e merge dependem de validação final. Nenhum dado real foi enviado, processado ou importado e nenhuma migration foi criada/aplicada. Esta entrega NÃO constitui carga inicial concluída; próximo pacote deve concretizar staging privado, associação/ledger auditável, mapeamentos de layouts por família, importação transacional para os domínios corretos e fotos privadas com reconciliação de todo o acervo. Homologação conjunta J1–J7 é a última tarefa.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-07D: proposta explícita Excel → perguntas da Anamnese (branch em CI)
 
 **Regra confirmada:** importação direta de XLSX e fotos como arquivos separados por `client_id`, sem ZIP externo. Fotos seguem Storage privado da cliente. Esta etapa diz respeito ao mapeamento do Excel; não cria nem simula resposta da cliente ao questionário atual.
