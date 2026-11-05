@@ -40,7 +40,7 @@ export function parseFamilyStageMapping(
   const questionIds = new Set(expected.allowed_question_ids);
   const seenQuestions = new Set<string>();
   const seenCells = new Set<string>();
-  for (const item of mappings) {
+  for (const item of (mappings as Record<string, any>[])) {
     if (!item || typeof item !== "object" || Array.isArray(item) || !exact(item, KEYS)) bad();
     if (!Number.isSafeInteger(item.sheet_index) || item.sheet_index < 0 || item.sheet_index >= 64
       || !Number.isSafeInteger(item.column_index) || item.column_index < 1 || item.column_index > 16384
