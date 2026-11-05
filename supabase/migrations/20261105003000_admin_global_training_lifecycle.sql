@@ -73,8 +73,9 @@ USING (
       WHERE ur.profile_id=(SELECT auth.uid()) AND ur.role='admin')
 )
 WITH CHECK (
-  (reviewed_by_profile_id IS NULL OR reviewed_by_profile_id=(SELECT auth.uid()))
-  AND (published_by_profile_id IS NULL OR published_by_profile_id=(SELECT auth.uid()))
+  -- The reviewer can differ from the publisher. The transition trigger below
+  -- binds the correct actor to EACH action without rewriting old authorship.
+  (published_by_profile_id IS NULL OR published_by_profile_id=(SELECT auth.uid()))
   AND coalesce((SELECT auth.jwt()->>'aal')='aal2',false)
   AND EXISTS (SELECT 1 FROM public.user_roles ur
       WHERE ur.profile_id=(SELECT auth.uid()) AND ur.role='admin')
@@ -130,6 +131,40 @@ ON public.client_training_plan_items FOR DELETE TO authenticated USING (
       WHERE v.id=client_training_plan_items.training_plan_version_id
         AND v.reviewed_at IS NULL AND v.published_at IS NULL)
 );
+
+-- Every authorized administrator may finish another administrator's reviewed
+-- plan, without forging who reviewed it or combining review and publication.
+-- Existing immutable-version and item triggers remain installed and active.
+CREATE FUNCTION public.enforce_training_review_publish_actor()
+RETURNS trigger LANGUAGE plpgsql
+SET search_path=pg_catalog
+AS $actor$
+BEGIN
+  IF OLD.reviewed_at IS NULL AND NEW.reviewed_at IS NOT NULL THEN
+    IF NEW.published_at IS NOT NULL THEN
+      RAISE EXCEPTION 'review and publication are distinct human decisions'
+        USING errcode='55000';
+    END IF;
+    IF NEW.reviewed_by_profile_id IS DISTINCT FROM auth.uid() THEN
+      RAISE EXCEPTION 'review actor must match verified identity'
+        USING errcode='42501';
+    END IF;
+  END IF;
+  IF OLD.published_at IS NULL AND NEW.published_at IS NOT NULL
+      AND NEW.published_by_profile_id IS DISTINCT FROM auth.uid() THEN
+    RAISE EXCEPTION 'publication actor must match verified identity'
+      USING errcode='42501';
+  END IF;
+  RETURN NEW;
+END
+$actor$;
+
+CREATE TRIGGER client_training_review_publish_actor
+BEFORE UPDATE ON public.client_training_plan_versions FOR EACH ROW
+EXECUTE FUNCTION public.enforce_training_review_publish_actor();
+
+REVOKE ALL ON FUNCTION public.enforce_training_review_publish_actor()
+FROM PUBLIC, anon, authenticated;
 
 -- Keep concurrency lock, strict prior request and one-open-draft contract.
 -- SECURITY INVOKER remains mandatory. Replace ONLY obsolete assignment gate.
