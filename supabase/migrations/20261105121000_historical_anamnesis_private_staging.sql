@@ -166,7 +166,9 @@ BEGIN
       OR v_question.answer_type NOT IN ('text', 'single_choice')
     THEN RAISE EXCEPTION 'Historical answer type not permitted' USING ERRCODE='22023'; END IF;
     IF v_question.answer_type='single_choice'
-      AND NOT (v_question.options ? (v_answer->>'raw_value'))
+      AND (v_question.options IS NULL
+        OR jsonb_typeof(v_question.options) <> 'array'
+        OR NOT (v_question.options ? (v_answer->>'raw_value')))
     THEN RAISE EXCEPTION 'Historical answer option unknown' USING ERRCODE='22023'; END IF;
     IF v_question.id = ANY(v_seen_questions)
     THEN RAISE EXCEPTION 'Duplicate historical question' USING ERRCODE='23505'; END IF;
