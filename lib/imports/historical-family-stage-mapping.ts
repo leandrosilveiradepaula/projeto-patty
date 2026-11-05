@@ -50,5 +50,5 @@ export function parseFamilyStageMapping(
     seenCells.add(cell);
     seenQuestions.add(item.question_id);
   }
-  return mapping as FamilyStageMapping;
+  return mapping as unknown as FamilyStageMapping;
 }
