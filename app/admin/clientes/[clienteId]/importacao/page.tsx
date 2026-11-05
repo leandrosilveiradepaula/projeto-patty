@@ -5,6 +5,7 @@ import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { HistoricalExcelReviewForm } from "@/components/admin/HistoricalExcelReviewForm";
+import { HistoricalAnamnesisStagedList } from "@/components/admin/HistoricalAnamnesisStagedList";
 import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileUploadForm";
 import { Section } from "@/components/ui/Section";
 import { Alert } from "@/components/ui/Alert";
@@ -32,22 +33,24 @@ export default async function HistoricalClientImportPage({
         meta="Excel e fotos da cliente — sem ZIP"
       />
       <ClientWorkspaceNav activeArea="importacao" clientId={client.id} />
-      <Alert variant="info" title="Importação histórica em preparação">
-        Primeiro confira a planilha e a identidade da cliente. A leitura do Excel ainda
-        não grava respostas de Anamnese, medidas ou Cadastro Atual. Para fotos, o
-        envio privado já está disponível abaixo e não faz liberação automática.
+      <Alert variant="info" title="Guarda histórica profissional e privada">
+        A conferência de Excel exige um lote registrado e confirmação profissional de identidade,
+        interpretação dos campos e guarda do original antes de armazenar respostas históricas.
+        Esse histórico permanece separado da Anamnese preenchida pela cliente e não é publicado.
       </Alert>
       <Section title="1. Conferir Excel da cliente" description="Selecione um arquivo .xlsx diretamente. Os valores serão exibidos apenas para conferência e não serão salvos.">
         <HistoricalExcelReviewForm clientId={client.id} targets={publishedAnamnesis} />
       </Section>
-      <Section title="2. Adicionar fotos à cliente" description="Escolha a categoria Foto. Cada imagem enviada fica vinculada a este cadastro interno, inclusive se a cliente estiver inativa. O envio é individual e mantém os arquivos ocultos até liberação explícita.">
+      <Section title="2. Históricos de Anamnese guardados" description="Somente a administração pode consultar os registros; nenhum histórico é liberado para a cliente.">
+        <HistoricalAnamnesisStagedList clientId={client.id} />
+      </Section>
+      <Section title="3. Adicionar fotos à cliente" description="Escolha a categoria Foto. Cada imagem enviada fica vinculada a este cadastro interno, inclusive se a cliente estiver inativa. O envio é individual e mantém os arquivos ocultos até liberação explícita.">
         <AdminPrivateFileUploadForm clientId={client.id} />
       </Section>
-      <Alert variant="warning" title="Conferência obrigatória antes de concluir o histórico">
-        Após a revisão de identidade e do significado das colunas, ainda será necessário
-        mapear as respostas, gravar o histórico no domínio correto e reconciliar
-        duplicidades de forma auditável. Nenhuma dessas etapas é feita automaticamente
-        nesta tela.
+      <Alert variant="warning" title="Carga inicial completa ainda pendente">
+        Esta página permite guardar Anamnese histórica de uma origem Excel reconciliada.
+        A carga inicial em lote, a importação de cadastro, medidas, avaliações e fotos de
+        todo o acervo e a reconciliação global continuam sendo entregas separadas.
       </Alert>
     </>
   );
