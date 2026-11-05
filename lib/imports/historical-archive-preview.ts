@@ -701,7 +701,7 @@ export function extractHistoricalDirectXlsxCells(
     const readXml = (name: string): string => {
       const entry = entries.get(name);
       if (!entry || entrySafetyError(entry, limits, 0)
-        || entry.uncompressedSize > limits.maxXmlBytesPerPart) blocked();
+        || entry.uncompressedSize > limits.maxXmlBytesPerPart) throw new Error("unsafe_xml_part");
       return decodeUtf8(extractEntry(excelBytes, entry, limits.maxXmlBytesPerPart));
     };
     const strings = entries.has("xl/sharedStrings.xml")
@@ -724,7 +724,7 @@ export function extractHistoricalDirectXlsxCells(
       for (let match = matches.exec(xml); match; match = matches.exec(xml)) {
         const attributes = match[1]!;
         const coords = /(?:^|\s)r="([A-Z]{1,3})([1-9][0-9]{0,6})"/.exec(attributes);
-        if (!coords) blocked(); // Cannot infer a cell position.
+        if (!coords) throw new Error("missing_cell_coordinate"); // Cannot infer a cell position.
         let col = 0;
         for (const letter of coords[1]!) col = col * 26 + letter.charCodeAt(0) - 64;
         if (col < 1 || col > 16384) blocked();
@@ -742,7 +742,7 @@ export function extractHistoricalDirectXlsxCells(
         let value: string;
         if (type === "inlineStr") {
           const inline = /<is>([\s\S]*?)<\/is>/.exec(body)?.[1];
-          if (inline === undefined) blocked();
+          if (inline === undefined) throw new Error("missing_inline_string");
           value = [...inline.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)]
             .map((part) => decodeXml(part[1]!)).join("");
         } else if (type === "s") {
@@ -750,7 +750,7 @@ export function extractHistoricalDirectXlsxCells(
             || !Number.isSafeInteger(Number(raw)) || Number(raw) >= strings.length) blocked();
           value = strings[Number(raw)]!;
         } else {
-          if (raw === undefined) blocked();
+          if (raw === undefined) throw new Error("missing_raw_value");
           value = decodeXml(raw);
         }
         cells.push({
