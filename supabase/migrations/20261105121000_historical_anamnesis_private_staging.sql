@@ -152,7 +152,6 @@ BEGIN
       OR NOT (v_map ?& ARRAY['question_id','sheet_index','column_index','row_index'])
       OR jsonb_typeof(v_answer->'raw_value') <> 'string'
       OR char_length(v_answer->>'raw_value') NOT BETWEEN 1 AND 4096
-      OR position(chr(0) in (v_answer->>'raw_value')) > 0
       OR (v_answer->>'raw_type') NOT IN ('s','n','str','b','d','inlineStr')
       OR NOT (v_answer - 'raw_value' - 'raw_type' = v_map)
     THEN RAISE EXCEPTION 'Invalid answer snapshot' USING ERRCODE='22023'; END IF;
