@@ -45,7 +45,12 @@ function fixture() {
     sources: [
       { source_id: "source_0001", sha256: hash(xlsxA), bytes: xlsxA, proposed_client_id: clientA },
       { source_id: "source_0002", sha256: hash(xlsxB), bytes: xlsxB, proposed_client_id: clientB },
-    ],
+    ] as Array<{
+      source_id: string;
+      sha256: string;
+      bytes: Uint8Array;
+      proposed_client_id?: string;
+    }>,
     questions,
   };
 }
