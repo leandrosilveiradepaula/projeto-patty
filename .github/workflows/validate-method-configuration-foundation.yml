@@ -116,6 +116,9 @@ jobs:
       - name: Run weekly feedback authenticated save lifecycle pgTAP
         run: npx supabase test db supabase/tests/database/weekly_feedback_private_save_lifecycle.test.sql
 
+      - name: Run AAL2 admin global manual weekly feedback pgTAP
+        run: npx supabase test db supabase/tests/database/admin_global_manual_weekly_feedback.test.sql
+
       - name: Run admin global professional follow-up pgTAP
         run: npx supabase test db supabase/tests/database/admin_global_professional_follow_up.test.sql
 
