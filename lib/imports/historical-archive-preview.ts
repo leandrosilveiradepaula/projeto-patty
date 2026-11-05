@@ -548,3 +548,94 @@ function scanWorksheet(xml: string, sharedStrings: readonly string[], limits: Hi
 }
 function decodeXml(value: string) { return value.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'"); }
 function ambiguousDate(value: string) { const [first, second] = value.split(/[/-]/).map(Number); return first <= 12 && second <= 12; }
+
+
+/**
+ * Direct-file preview: an XLSX workbook plus separate photo files.
+ * A previously shared ZIP is only an example transport, never a required
+ * import input. No cell contents, original filenames or photos leave here.
+ *
+ * This returns candidate metadata only. It does not associate identities,
+ * approve mappings, write data, or publish a client's history.
+ */
+export function previewHistoricalDirectFiles(
+  excelBytes: Uint8Array,
+  photoBytes: readonly Uint8Array[],
+): Readonly<{
+  version: "historical-direct-files-v1";
+  mode: "dry_run";
+  persistence: "none";
+  import_allowed: false;
+  excel: Readonly<{
+    state: "recognized_unmapped" | "blocked";
+    sha256?: string;
+    column_signature_sha256?: string;
+    worksheet_count?: number;
+  }>;
+  photos: readonly Readonly<{
+    state: "candidate_private_photo" | "blocked";
+    kind?: "jpeg" | "png";
+    sha256?: string;
+  }>[];
+}> {
+  const validBytes = (value: unknown): value is Uint8Array =>
+    value instanceof Uint8Array && value.byteLength > 0
+    && value.byteLength <= DEFAULT_LIMITS.maxUncompressedBytesPerEntry;
+
+  let excel: {
+    state: "recognized_unmapped" | "blocked";
+    sha256?: string;
+    column_signature_sha256?: string;
+    worksheet_count?: number;
+  } = { state: "blocked" };
+
+  if (validBytes(excelBytes) && excelBytes.length >= 4 && u32(excelBytes, 0) === 0x04034b50) {
+    try {
+      const budget: PreviewBudget = {
+        usedBytes: 0, worksheetCount: 0, xmlBytes: 0, cellCount: 0,
+        sharedStringCount: 0, sharedStringBytes: 0,
+      };
+      const info = inspectXlsx(excelBytes, DEFAULT_LIMITS, budget);
+      excel = {
+        state: "recognized_unmapped",
+        sha256: sha256Hex(excelBytes),
+        column_signature_sha256: sha256Hex(new TextEncoder().encode(info.columnSignature)),
+        worksheet_count: info.worksheetCount,
+      };
+    } catch {
+      // Fail closed. Never echo source content or an exception with PII.
+    }
+  }
+
+  const photos = (Array.isArray(photoBytes) ? photoBytes : []).slice(0, 100)
+    .map((bytes) => {
+      if (!validBytes(bytes)) return { state: "blocked" as const };
+      const kind = isPng(bytes) ? "png" as const : isJpeg(bytes) ? "jpeg" as const : undefined;
+      if (!kind) return { state: "blocked" as const };
+      return {
+        state: "candidate_private_photo" as const,
+        kind,
+        sha256: sha256Hex(bytes),
+      };
+    });
+  // An over-limit photo batch must never be truncated and treated as complete.
+  if (!Array.isArray(photoBytes) || photoBytes.length > 100) {
+    return {
+      version: "historical-direct-files-v1", mode: "dry_run", persistence: "none",
+      import_allowed: false, excel: { state: "blocked" },
+      photos: [{ state: "blocked" }],
+    };
+  }
+  const seen = new Set<string>();
+  const uniquePhotos = photos.map((photo) => {
+    if (!("sha256" in photo) || !photo.sha256) return photo;
+    if (seen.has(photo.sha256)) return { state: "blocked" as const };
+    seen.add(photo.sha256);
+    return photo;
+  });
+  return {
+    version: "historical-direct-files-v1", mode: "dry_run",
+    persistence: "none", import_allowed: false,
+    excel, photos: uniquePhotos,
+  };
+}
