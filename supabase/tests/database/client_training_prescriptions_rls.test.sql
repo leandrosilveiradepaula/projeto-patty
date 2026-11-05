@@ -484,7 +484,7 @@ select throws_ok(
     )
   $sql$,
   '42501',
-  'active admin assignment is required',
+  'authorized admin and client are required',
   'client cannot create own prescription'
 );
 
