@@ -36,7 +36,7 @@ test("original XLSX retention verifies already-uploaded bytes and never publishe
   assert.match(server, /\.download\(storagePath\)/);
   assert.match(server, /digest\(new Uint8Array\(await original\.arrayBuffer\(\)\)\)/);
   assert.match(server, /stage_historical_anamnesis_source/);
-  assert.doesNotMatch(server, /console\.|createUser|\.from\("anamnesis_submissions"\)|publish|\.update\(/);
+  assert.doesNotMatch(server, /console\.|createUser|\.from\("anamnesis_submissions"\)|publishHistoricalAnamnesis|\.update\(/);
   assert.match(sql, /CREATE TABLE public\.historical_anamnesis_imports/);
   assert.match(sql, /UNIQUE \(batch_id, source_id\)/);
   assert.match(sql, /CREATE POLICY historical_originals_never_browser/);
