@@ -97,7 +97,7 @@ test("ledger UI does not claim photographs imported merely by being inventoried"
   assert.match(ui, /Foto não guardada/);
   assert.match(ui, /Foto guardada — consultar/);
   assert.match(ui, /HistoricalPhotoStageForm/);
-  assert.match(form, /photoReview && custody/);
+  assert.match(form, /!identity \|\| !photoReview \|\| !custody/);
   assert.match(form, /crypto\.subtle\.digest\("SHA-256"/);
   assert.doesNotMatch(form, /getPublicUrl|createAdminClient|console\./);
 });
