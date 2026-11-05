@@ -217,6 +217,28 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
     }
   }
 
+  function exportFamilyMapping() {
+    if (!preview || !targets || !mapped || mappings.length < 1) return;
+    // The export contains ONLY reviewed coordinates and versioned question IDs.
+    // Do not export any original answers, filenames, names or Client IDs.
+    const metadata = {
+      version: "historical-family-anamnesis-v1",
+      column_signature_sha256: preview.column_signature_sha256,
+      form_version_id: targets.form_version_id,
+      mappings: mappings.map(({ sheet_index, column_index, row_index, question_id }) => ({
+        sheet_index, column_index, row_index, question_id,
+      })),
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(metadata, null, 2)], {
+      type: "application/json",
+    }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "mapeamento-familia-anamnese.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   function addMapping() {
     if (!review || !targets || !selectedQuestion || pending) return;
     const cell = review.cells.find((item) => item.row_index === selectedRow);
@@ -397,6 +419,10 @@ export function HistoricalExcelReviewForm({ clientId, targets }: {
           </div>
           <Button type="button" loading={pending} disabled={pending || !targets || !identityConfirmed}
             onClick={() => void send("map")}>Validar correspondências da Anamnese</Button>
+          {mapped ? (
+            <Button type="button" variant="secondary" disabled={pending}
+              onClick={exportFamilyMapping}>Exportar mapa técnico para o lote (sem respostas)</Button>
+          ) : null}
           {mapped ? (
             <Alert variant="info" live="polite" title="Proposta conferida — aprovação profissional pendente">
               {mapped.proposed_answer_count} correspondência(s) estruturalmente válidas. Protocolo de integridade: <code>{mapped.proposal_sha256.slice(0, 16)}</code>… Nenhuma resposta foi gravada.
