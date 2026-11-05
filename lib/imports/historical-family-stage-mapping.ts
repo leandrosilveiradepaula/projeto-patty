@@ -40,17 +40,21 @@ export function parseFamilyStageMapping(
   const questionIds = new Set(expected.allowed_question_ids);
   const seenQuestions = new Set<string>();
   const seenCells = new Set<string>();
-  for (const item of (mappings as Record<string, any>[])) {
-    if (!item || typeof item !== "object" || Array.isArray(item) || !exact(item, KEYS)) bad();
-    if (!Number.isSafeInteger(item.sheet_index) || item.sheet_index < 0 || item.sheet_index >= 64
-      || !Number.isSafeInteger(item.column_index) || item.column_index < 1 || item.column_index > 16384
-      || !Number.isSafeInteger(item.row_index) || item.row_index < 1 || item.row_index > 9999999
-      || typeof item.question_id !== "string" || !isUuid(item.question_id)
-      || !questionIds.has(item.question_id)) bad();
-    const cell = [item.sheet_index, item.column_index, item.row_index].join(":");
-    if (seenCells.has(cell) || seenQuestions.has(item.question_id)) bad();
+  for (const value of (mappings as unknown[])) {
+    if (!value || typeof value !== "object" || Array.isArray(value) || !exact(value, KEYS)) bad();
+    const item = value as Record<string, unknown>;
+    const sheet = item.sheet_index;
+    const column = item.column_index;
+    const row = item.row_index;
+    const question = item.question_id;
+    if (typeof sheet !== "number" || !Number.isSafeInteger(sheet) || sheet < 0 || sheet >= 64
+      || typeof column !== "number" || !Number.isSafeInteger(column) || column < 1 || column > 16384
+      || typeof row !== "number" || !Number.isSafeInteger(row) || row < 1 || row > 9999999
+      || typeof question !== "string" || !isUuid(question) || !questionIds.has(question)) bad();
+    const cell = [sheet, column, row].join(":");
+    if (seenCells.has(cell) || seenQuestions.has(question)) bad();
     seenCells.add(cell);
-    seenQuestions.add(item.question_id);
+    seenQuestions.add(question);
   }
   return mapping as unknown as FamilyStageMapping;
 }
