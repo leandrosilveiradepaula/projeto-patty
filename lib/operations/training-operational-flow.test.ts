@@ -51,3 +51,19 @@ test("manual professional training requests refresh after confirmed success", ()
   const source = read("components/admin/AdminTrainingRequestForm.tsx");
   assert.ok(source.indexOf("router.refresh()") > source.indexOf("if (state.success)"));
 });
+
+test("reviewed training for inactive clients remains internal in UI and server", () => {
+  const page = read("app/admin/clientes/[clienteId]/treino/page.tsx");
+  const action = read("app/admin/clientes/[clienteId]/treino/actions.ts");
+  const start=action.indexOf("export async function publishTrainingPlanVersionAction(");
+  const end=action.indexOf("/** Explicitly copy one immutable published item",start);
+  const release=action.slice(start,end);
+  assert.ok(page.includes("trainingPublicationEligibility(client)"));
+  assert.ok(page.includes("publicationEligibility.allowed ?"));
+  assert.ok(page.includes('title="Publicação indisponível"'));
+  assert.ok(release.includes('isSingleConfirmedFormValue(_formData, "confirmPublish")'));
+  assert.ok(release.includes("getAccessibleClient(client.id)"));
+  assert.ok(release.includes("trainingPublicationEligibility(currentClient)"));
+  assert.ok(release.indexOf("trainingPublicationEligibility(currentClient)") < release.indexOf("publishAccessibleClientTrainingPlanVersion(version.id)"));
+  assert.ok(release.includes("requireAccessibleTrainingVersion("));
+});
