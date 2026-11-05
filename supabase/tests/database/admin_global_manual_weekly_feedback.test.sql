@@ -109,7 +109,7 @@ SELECT throws_ok($q$
  VALUES('d2200000-0000-4000-8000-000000000001',
  (SELECT id FROM public.weekly_feedback_form_versions WHERE version_number=1),
  '2026-11-09','2026-11-15','d2100000-0000-4000-8000-000000000001','schedule')
-$q$,'23514',NULL,'Manual admin cannot spoof scheduler source');
+$q$,'42501',NULL,'Manual admin cannot spoof scheduler source');
 
 RESET ROLE;
 UPDATE public.clients SET status='inactive'
