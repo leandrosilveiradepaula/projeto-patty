@@ -2,9 +2,9 @@ begin;
 
 select plan(32);
 
-select has_table('public', 'client_training_plans');
-select has_table('public', 'client_training_plan_versions');
-select has_table('public', 'client_training_plan_items');
+select has_table('public', 'client_training_plans', 'client_training_plans exists');
+select has_table('public', 'client_training_plan_versions', 'client_training_plan_versions exists');
+select has_table('public', 'client_training_plan_items', 'client_training_plan_items exists');
 
 select ok(
   (select relrowsecurity from pg_class where oid = 'public.client_training_plans'::regclass),
@@ -501,8 +501,8 @@ select throws_ok(
       '1'
     )
   $sql$,
-  '42501',
-  null,
+  '55000',
+  'reviewed or published training plan items are immutable',
   'client cannot insert prescription items'
 );
 
