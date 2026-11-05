@@ -95,3 +95,21 @@ test("both new and preexisting weekly feedback requests open their authorized ex
   assert.match(page, /authorizedExactRecordPage\(/);
   assert.match(page, /exactRecordLocated/);
 });
+
+test("J2 request eligibility is mirrored on admin UI and revalidated by server action", () => {
+  const page = read("app/admin/clientes/[clienteId]/feedback-semanal/page.tsx");
+  const action = read("app/admin/clientes/[clienteId]/feedback-semanal/actions.ts");
+  const policy = read("supabase/migrations/20261105015000_admin_global_manual_weekly_feedback.sql");
+  assert.match(page, /manualWeeklyFeedbackEligibility\(client, eligible\)/);
+  assert.match(page, /eligible=\{manualRequestAllowed\}/);
+  assert.match(page, /: requestEligibility\.message/);
+  assert.match(action, /requireRole\("admin"\)/);
+  assert.match(action, /manualWeeklyFeedbackEligibility\(client,eligible\)/);
+  assert.ok(action.indexOf("manualWeeklyFeedbackEligibility(client,eligible)") < action.indexOf("createAccessibleWeeklyFeedbackRequest({"));
+  assert.match(policy, /client_weekly_feedbacks_insert_admin_global_manual_aal2/);
+  assert.match(policy, /client_weekly_feedbacks_manual_active_profile_only/);
+  assert.match(policy, /AS RESTRICTIVE FOR INSERT TO authenticated/);
+  assert.match(policy, /c\.status='active'/);
+  assert.match(policy, /c\.profile_id IS NOT NULL/);
+  assert.doesNotMatch(policy, /CREATE POLICY .* FOR UPDATE/i);
+});
