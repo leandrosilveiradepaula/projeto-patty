@@ -52,9 +52,10 @@ export function parseFamilyStageMapping(
       || typeof row !== "number" || !Number.isSafeInteger(row) || row < 1 || row > 9999999
       || typeof question !== "string" || !isUuid(question) || !questionIds.has(question)) bad();
     const cell = [sheet, column, row].join(":");
-    if (seenCells.has(cell) || seenQuestions.has(question)) bad();
+    const validatedQuestion = question as string;
+    if (seenCells.has(cell) || seenQuestions.has(validatedQuestion)) bad();
     seenCells.add(cell);
-    seenQuestions.add(question);
+    seenQuestions.add(validatedQuestion);
   }
   return mapping as unknown as FamilyStageMapping;
 }
