@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { PublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical-anamnesis-targets";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
@@ -31,6 +32,22 @@ type CellReview = {
   cells: RawCell[];
 };
 
+type PendingMapping = {
+  sheet_index: number;
+  column_index: number;
+  row_index: number;
+  question_id: string;
+  raw_value: string;
+};
+
+type MappingResult = {
+  state: "pending_professional_review";
+  persistence: "none";
+  approval: "human_required";
+  proposed_answer_count: number;
+  proposal_sha256: string;
+};
+
 type ApiResult = {
   state?: string;
   persistence?: string;
@@ -41,9 +58,15 @@ type ApiResult = {
   sample_limit?: number;
   cells?: RawCell[];
   error?: string;
+  approval?: string;
+  proposed_answer_count?: number;
+  proposal_sha256?: string;
 };
 
-export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
+export function HistoricalExcelReviewForm({ clientId, targets }: {
+  clientId: string;
+  targets: PublishedHistoricalAnamnesisTargets | null;
+}) {
   const [file, setFile] = useState<File | null>(null);
   const [identityConfirmed, setIdentityConfirmed] = useState(false);
   const [preview, setPreview] = useState<SourcePreview | null>(null);
@@ -51,6 +74,10 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
   const [sheetIndex, setSheetIndex] = useState(0);
   const [columnIndex, setColumnIndex] = useState(1);
   const [pending, setPending] = useState(false);
+  const [mappings, setMappings] = useState<PendingMapping[]>([]);
+  const [mapped, setMapped] = useState<MappingResult | null>(null);
+  const [selectedRow, setSelectedRow] = useState(0);
+  const [selectedQuestion, setSelectedQuestion] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
   const fileValid = file !== null && file.size > 0 && file.size <= MAX_EXCEL_BYTES
@@ -64,9 +91,13 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
     setSheetIndex(0);
     setColumnIndex(1);
     setIdentityConfirmed(false);
+    setMappings([]);
+    setMapped(null);
+    setSelectedRow(0);
+    setSelectedQuestion("");
   }
 
-  async function send(operation: "inspect" | "cells") {
+  async function send(operation: "inspect" | "cells" | "map") {
     if (pending || !identityConfirmed || !fileValid || !file) return;
     if (operation === "cells" && (!preview || !Number.isSafeInteger(sheetIndex)
       || sheetIndex < 0 || sheetIndex >= preview.worksheet_count
@@ -74,22 +105,34 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
       setMessage("Confira a aba e a coluna antes de consultar valores.");
       return;
     }
+    if (operation === "map" && (!preview || !targets || mappings.length === 0)) {
+      setMessage("Escolha ao menos uma resposta e um campo de destino para conferir o mapeamento.");
+      return;
+    }
     setPending(true);
     setMessage(null);
+    setMapped(null);
     if (operation === "inspect") {
       setPreview(null);
       setReview(null);
-    } else {
+    } else if (operation === "cells") {
       setReview(null);
     }
     const data = new FormData();
     data.set("operation", operation);
     data.set("excel", file);
-    if (operation === "cells" && preview) {
+    if ((operation === "cells" || operation === "map") && preview) {
       data.set("sha256", preview.sha256);
       data.set("column_signature_sha256", preview.column_signature_sha256);
-      data.set("sheet_index", String(sheetIndex));
-      data.set("column_index", String(columnIndex));
+      if (operation === "cells") {
+        data.set("sheet_index", String(sheetIndex));
+        data.set("column_index", String(columnIndex));
+      } else if (targets) {
+        data.set("form_version_id", targets.form_version_id);
+        data.set("mappings", JSON.stringify(mappings.map(({ sheet_index, column_index, row_index, question_id }) => ({
+          sheet_index, column_index, row_index, question_id,
+        }))));
+      }
     }
     try {
       const result = await fetch(`/api/admin/clients/${clientId}/historical-excel`, {
@@ -114,7 +157,7 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
           return;
         }
         setPreview(json as SourcePreview);
-      } else {
+      } else if (operation === "cells") {
         if (json.state !== "raw_unapproved" || json.persistence !== "none"
           || !Array.isArray(json.cells) || typeof json.cell_count !== "number"
           || typeof json.sample_limit !== "number") {
@@ -122,6 +165,16 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
           return;
         }
         setReview(json as CellReview);
+        setSelectedRow(json.cells[0]?.row_index ?? 0);
+      } else {
+        if (json.state !== "pending_professional_review"
+          || json.persistence !== "none" || json.approval !== "human_required"
+          || typeof json.proposal_sha256 !== "string"
+          || typeof json.proposed_answer_count !== "number") {
+          setMessage("O mapeamento foi bloqueado. Confira cada correspondência e os tipos de respostas.");
+          return;
+        }
+        setMapped(json as MappingResult);
       }
     } catch {
       setMessage("Não foi possível conferir o Excel. Nenhum valor foi importado.");
@@ -129,6 +182,25 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
     } finally {
       setPending(false);
     }
+  }
+
+  function addMapping() {
+    if (!review || !targets || !selectedQuestion || pending) return;
+    const cell = review.cells.find((item) => item.row_index === selectedRow);
+    if (!cell) return;
+    if (mappings.some((item) => item.question_id === selectedQuestion
+      || (item.sheet_index === cell.sheet_index
+        && item.column_index === cell.column_index && item.row_index === cell.row_index))
+      || mappings.length >= 64) {
+      setMessage("Esta célula ou pergunta já foi escolhida, ou o limite de 64 correspondências foi atingido.");
+      return;
+    }
+    setMappings((current) => [...current, {
+      sheet_index: cell.sheet_index, column_index: cell.column_index,
+      row_index: cell.row_index, question_id: selectedQuestion, raw_value: cell.raw_value,
+    }]);
+    setMapped(null);
+    setMessage(null);
   }
 
   return (
@@ -156,6 +228,8 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
             setIdentityConfirmed(event.target.checked);
             setPreview(null);
             setReview(null);
+            setMappings([]);
+            setMapped(null);
           }} />
         <span>Conferi que esta planilha pertence à cliente identificada no topo da página. Sei que nomes semelhantes não comprovam identidade.</span>
       </label>
@@ -184,6 +258,7 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
                   disabled={pending} onChange={(event) => {
                     setSheetIndex(event.currentTarget.valueAsNumber);
                     setReview(null);
+                    setMapped(null);
                   }} />
               )}
             </FormField>
@@ -227,6 +302,68 @@ export function HistoricalExcelReviewForm({ clientId }: { clientId: string }) {
           <Alert variant="info">
             A leitura não atribui campos de Anamnese, Cadastro Atual ou Avaliação. O mapeamento e a identificação devem ser aprovados antes de qualquer gravação.
           </Alert>
+          {targets?.questions.length ? (
+            <div className={styles.preview}>
+              <strong>Associar célula a pergunta existente</strong>
+              <p>Versão publicada da Anamnese: {targets.version_number}. Não existe associação automática por título ou posição.</p>
+              <div className={styles.selectors}>
+                <FormField id="historical-map-row" label="Linha da resposta">
+                  {(props) => (
+                    <select {...props} className={styles.number} value={selectedRow}
+                      disabled={pending} onChange={(event) => setSelectedRow(Number(event.target.value))}>
+                      {review.cells.map((cell) => (
+                        <option key={cell.row_index} value={cell.row_index}>Linha {cell.row_index}</option>
+                      ))}
+                    </select>
+                  )}
+                </FormField>
+                <FormField id="historical-map-question" label="Pergunta de destino">
+                  {(props) => (
+                    <select {...props} className={styles.number} value={selectedQuestion}
+                      disabled={pending} onChange={(event) => setSelectedQuestion(event.target.value)}>
+                      <option value="">Selecione uma pergunta</option>
+                      {targets.questions.map((question) => (
+                        <option key={question.id} value={question.id}>{question.label}</option>
+                      ))}
+                    </select>
+                  )}
+                </FormField>
+              </div>
+              <Button type="button" variant="secondary"
+                disabled={pending || !selectedRow || !selectedQuestion} onClick={addMapping}>
+                Adicionar correspondência para revisão
+              </Button>
+            </div>
+          ) : <p>Não há perguntas versionadas disponíveis para esta importação.</p>}
+        </div>
+      ) : null}
+      {mappings.length > 0 ? (
+        <div className={styles.preview}>
+          <strong>Correspondências propostas — sem gravação</strong>
+          <p>{mappings.length} campo(s). Os valores originais foram mantidos apenas nesta página e não serão enviados a um cadastro até aprovação e implementação de importação histórica.</p>
+          <div className={styles.tableScroll}>
+            <table className={styles.table}>
+              <thead><tr><th>Célula</th><th>Pergunta</th><th>Resposta original</th><th>Ação</th></tr></thead>
+              <tbody>
+                {mappings.map((item) => (
+                  <tr key={item.question_id}>
+                    <td>{item.sheet_index + 1} / {item.column_index} / {item.row_index}</td>
+                    <td>{targets?.questions.find((target) => target.id === item.question_id)?.label ?? "Pergunta indisponível"}</td>
+                    <td className={styles.rawValue}>{item.raw_value}</td>
+                    <td><Button size="compact" type="button" variant="outline" disabled={pending}
+                      onClick={() => { setMappings((current) => current.filter((a) => a.question_id !== item.question_id)); setMapped(null); }}>Remover</Button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Button type="button" loading={pending} disabled={pending || !targets || !identityConfirmed}
+            onClick={() => void send("map")}>Validar correspondências da Anamnese</Button>
+          {mapped ? (
+            <Alert variant="info" live="polite" title="Proposta conferida — aprovação profissional pendente">
+              {mapped.proposed_answer_count} correspondência(s) estruturalmente válidas. Protocolo de integridade: <code>{mapped.proposal_sha256.slice(0, 16)}</code>… Nenhuma resposta foi gravada.
+            </Alert>
+          ) : null}
         </div>
       ) : null}
       <p className={styles.notice}>
