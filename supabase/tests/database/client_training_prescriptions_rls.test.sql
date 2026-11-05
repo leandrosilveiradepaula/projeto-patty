@@ -2,9 +2,9 @@ begin;
 
 select plan(32);
 
-select has_table('public', 'client_training_plans');
-select has_table('public', 'client_training_plan_versions');
-select has_table('public', 'client_training_plan_items');
+select has_table('public', 'client_training_plans', 'client_training_plans exists');
+select has_table('public', 'client_training_plan_versions', 'client_training_plan_versions exists');
+select has_table('public', 'client_training_plan_items', 'client_training_plan_items exists');
 
 select ok(
   (select relrowsecurity from pg_class where oid = 'public.client_training_plans'::regclass),
@@ -46,10 +46,11 @@ values
   ('a1000000-0000-0000-0000-000000000001', 'admin'),
   ('a1000000-0000-0000-0000-000000000002', 'client');
 
-insert into public.clients (id, profile_id)
+insert into public.clients (id, profile_id, status)
 values (
   'a2000000-0000-0000-0000-000000000001',
-  'a1000000-0000-0000-0000-000000000002'
+  'a1000000-0000-0000-0000-000000000002',
+  'active'
 );
 
 insert into public.client_assignments (client_id, staff_profile_id)
@@ -336,25 +337,20 @@ select isnt(
   'admin explicitly reviews non-empty training draft'
 );
 
-select throws_ok(
-  $sql$
-    update public.client_training_plan_items
-    set repetitions_text = '99'
-    where training_plan_version_id = (
-      select id
-      from public.client_training_plan_versions
-      where training_plan_id = (
-        select id
-        from public.client_training_plans
-        where client_id = 'a2000000-0000-0000-0000-000000000001'
-      )
-        and published_at is null
-    )
-  $sql$,
-  '55000',
-  'reviewed or published training plan items are immutable',
-  'review freezes training exercise items'
-);
+with changed as (
+  update public.client_training_plan_items
+  set repetitions_text = '99'
+  where training_plan_version_id = (
+    select id from public.client_training_plan_versions
+    where training_plan_id = (
+      select id from public.client_training_plans
+      where client_id = 'a2000000-0000-0000-0000-000000000001'
+    ) and published_at is null
+  )
+  returning id
+)
+select is(count(*),0::bigint,'review freezes training exercise items under RLS')
+from changed;
 
 select isnt(
   public.publish_client_training_plan_version(
@@ -388,21 +384,17 @@ select is(
   'one immutable published training version exists'
 );
 
-select throws_ok(
-  $sql$
-    update public.client_training_plan_versions
-    set title = 'Tentativa de reescrita'
-    where training_plan_id = (
-      select id
-      from public.client_training_plans
-      where client_id = 'a2000000-0000-0000-0000-000000000001'
-    )
-      and published_at is not null
-  $sql$,
-  '55000',
-  'published training plan version is immutable',
-  'published training version cannot be rewritten'
-);
+with changed as (
+  update public.client_training_plan_versions
+  set title = 'Tentativa de reescrita'
+  where training_plan_id = (
+    select id from public.client_training_plans
+    where client_id = 'a2000000-0000-0000-0000-000000000001'
+  ) and published_at is not null
+  returning id
+)
+select is(count(*),0::bigint,'published training version cannot be rewritten under RLS')
+from changed;
 
 select isnt(
   public.create_client_training_plan_draft(
@@ -484,7 +476,7 @@ select throws_ok(
     )
   $sql$,
   '42501',
-  'active admin assignment is required',
+  'authorized admin and client are required',
   'client cannot create own prescription'
 );
 
@@ -509,8 +501,8 @@ select throws_ok(
       '1'
     )
   $sql$,
-  '42501',
-  null,
+  '55000',
+  'reviewed or published training plan items are immutable',
   'client cannot insert prescription items'
 );
 

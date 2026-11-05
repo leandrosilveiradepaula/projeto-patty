@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireRole } from "@/lib/supabase/auth";
 import { isSingleConfirmedFormValue } from "@/lib/validation/form-fields";
+import { trainingPublicationEligibility } from "@/lib/training/publication-eligibility";
 import {
   createAccessibleClientTrainingPlanDraft,
   copyAccessiblePublishedTrainingPlanItems,
@@ -129,7 +130,7 @@ async function requireAccessibleTrainingContext(clientId: string) {
   const client = await getAccessibleClient(clientId);
 
   if (!client) {
-    throw new Error("Cliente não acessível para a atribuição atual.");
+    throw new Error("Cliente não acessível para a sessão administrativa.");
   }
 
   return client;
@@ -608,6 +609,14 @@ export async function publishTrainingPlanVersionAction(
     }
     if (!isSingleConfirmedFormValue(_formData, "confirmPublish")) {
       return initialError("Confirme explicitamente a publicação desta versão para a cliente.");
+    }
+
+    // State can change since the admin loaded the page. Do not rely on the
+    // hidden form or the UI; restrictive RLS remains the final permission gate.
+    const currentClient = await getAccessibleClient(client.id);
+    const eligibility = trainingPublicationEligibility(currentClient);
+    if (!eligibility.allowed) {
+      return initialError(eligibility.message ?? "Publicação indisponível para esta cliente.");
     }
 
     await publishAccessibleClientTrainingPlanVersion(version.id);

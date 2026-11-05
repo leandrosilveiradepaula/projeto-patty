@@ -1,3 +1,15 @@
+## 2026-11-05 — J5-ADMIN-GLOBAL-TRAINING-01: solicitação, rascunho e revisão de treino sem assignment (PR em validação)
+
+**Evidência:** acesso SELECT admin global AAL2 já aplicado em `client_training_requests`, `client_training_plans`, `client_training_plan_versions` e `client_training_plan_items`, mas INSERT/UPDATE/DELETE e a função `create_client_training_plan_draft` ainda exigiam assignment ativo. Isso impedia que a administradora concluísse o trabalho no painel de cliente histórica ou reassumida, contrariando `DECISIONS.md` de 01/11. Registro do escopo e critérios na issue #1008.
+
+**Mudança proposta:** migration NOVA `20261105003000_admin_global_training_lifecycle.sql` inclui policies RLS de admin AAL2 para pedido, criação de plano/versão, edição de exercício em draft e revisão/publicação por ação humana; substitui somente o gate de assignment da RPC `SECURITY INVOKER`, mantendo pedido prévio, `pg_advisory_xact_lock`, autoria, uma única versão aberta e triggers de congelamento. A policy RESTRICTIVE de UPDATE proíbe publicação para Client `inactive` ou sem `Profile`, inclusive quando a antiga policy de assignment também permita. A interface exibe motivo objetivo quando não elegível, e a Server Action confere Client atual antes do INSERT/UPDATE final; RLS continua a proteção final. O pedido não prescreve treino, IA não publica e nenhuma progressão profissional é inferida.
+
+**Verificação:** pgTAP NOVO sintético com transições e negativos AAL1/client/sem role, sem Profile, revisão, publicação, histórico imutável, e teste de função de elegibilidade/continuidade UI/action. O workflow `Validate method configuration foundation` passa a executar explicitamente esse pgTAP no Supabase descartável, além de `Validate application` e browser J5. Nenhum arquivo real ou cliente real usado.
+
+**Estados:** implementado/commitado em branch; CI e merge a verificar no SHA final; migration no Supabase SaaS **NÃO aplicada**; Vercel READY do novo commit NÃO verificada; homologação profissional NÃO (última tarefa J1–J7). Não executar SQL direto no SaaS nem deploy manual. Depois de CI verde e revisão específica, merge e dry-run versionado; apply exige operação separada e confirmação.
+
+---
+
 ## 2026-11-04 — J4-PUBLISH-ELIGIBILITY-UI-01: bloqueio claro de publicação para cliente inativa/sem Profile (PR em validação)
 
 **Evidência factual:** migration `20261104123000_admin_global_nutrition_human_lifecycle.sql` aplicada no Supabase SaaS pelo workflow oficial [#41857974374](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/41857974374), com APPLY/VERIFY SUCCESS. Verificação por leitura de `pg_policies`, triggers e `supabase_migrations.schema_migrations` confirmou RLS RESTRICTIVE `protocol_publications_active_client_only`, MFA AAL2 e registros das migrations `20261104120000` e `20261104123000`. O deployment Vercel de produção `dpl_7p6wjK7jw7JGxsewKWbvrvTmK414` estava READY em `master=ec729ae58d1e1e418be8f9b6ccf3fe355e4a6260`. Isso **não comprova homologação humana** nem equivale a teste de cliente real.

@@ -283,7 +283,7 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       expect(first.published_at).toBeNull();
       expect(visibleCount(staff.id, "aal2", "client_training_plan_versions", first.id)).toBe(1);
       expect(visibleCount(staff.id, "aal1", "client_training_plan_versions", first.id)).toBe(0);
-      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", first.id)).toBe(0);
+      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", first.id)).toBe(1);
       expect(visibleCount(owner.id, "aal1", "client_training_plan_versions", first.id)).toBe(0);
       await expect(clientPage.getByText("Nenhum treino publicado", { exact: true })).toBeVisible();
       await expect(adminPage.getByRole("heading", { name: "Adicionar exercício" })).toBeVisible();
@@ -380,27 +380,28 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       await mobileWidth(clientPage);
     });
 
-    await test.step("Other admin cannot access client workspace", async () => {
+    await test.step("Another authorized AAL2 admin can inspect the client workspace without assignment", async () => {
       await loginAdminWithMfa(outsiderPage, {
         email: unassigned.email, password: unassigned.password, totpSecret: otherTotp,
       });
-      // Next.js can return HTTP 200 for streamed notFound boundaries. Assert
-      // absence of the private workspace, and independently prove SQL RLS.
+      // The confirmed administrator role is global at AAL2; assignment is
+      // historical context, not a permission gate. Client isolation remains.
       await outsiderPage.goto(adminRoute);
-      await expect(outsiderPage.getByRole("heading", { name: "Prescrição de treino" })).toHaveCount(0);
-      await expect(outsiderPage.getByText("J5 Treino B sintetico", { exact: false })).toHaveCount(0);
-      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", second.id)).toBe(0);
-      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_items", copied.id)).toBe(0);
+      await expect(outsiderPage.getByRole("heading", { name: "Prescrição de treino" })).toBeVisible();
+      await expect(outsiderPage.getByText("J5 Treino B sintetico", { exact: false }).first()).toBeVisible();
+      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_versions", second.id)).toBe(1);
+      expect(visibleCount(unassigned.id, "aal2", "client_training_plan_items", copied.id)).toBe(1);
       expect(visibleCount(foreign.id, "aal1", "client_training_plan_items", copied.id)).toBe(0);
     });
 
     await test.step("Concurrent authenticated draft RPCs serialize per client without extra grants", async () => {
-      // AAL2 alone never grants access without an active assignment.
+      // Global role does not authorize manufacturing a new Client identity.
+      // Use an unknown UUID here so the concurrency fixture stays unchanged.
       const strangerApi = await authenticatedAdminApi(unassigned, otherTotp);
       try {
         const denied = await strangerApi.rpc("create_client_training_plan_draft", {
-          p_client_id: clientId,
-          p_title: "J5 forbidden third draft",
+          p_client_id: randomUUID(),
+          p_title: "J5 unknown Client",
           p_notes: null,
         });
         expect(denied.data).toBeNull();
@@ -448,7 +449,7 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
       }
     });
 
-    await test.step("Ending assignment in MFA UI revokes former staff access and preserves J5 history", async () => {
+    await test.step("Ending assignment preserves global AAL2 admin access and J5 history", async () => {
       // Preconditions are actual J5 publications and a local-only
       // concurrent draft created by authenticated workflows above.
       const assignment=rows("select id,ended_at from public.client_assignments"+
@@ -493,30 +494,30 @@ test("J5: client requests, Patty reviews/publishes exact training versions and a
         .toEqual([{status:"inactive"}]);
       expect(versions(clientId)).toEqual(allVersions);
 
-      // A pre-existing AAL2 session must not retain permissions after the
-      // assignment ends, even for versions the same staff member published.
+      // Closing the professional relationship does not revoke independently
+      // authorized AAL2 administrator access to historical records.
       for(const version of [first,second,allVersions[2]]){
         expect(visibleCount(staff.id,"aal2","client_training_plan_versions",version.id))
-          .toBe(0);
+          .toBe(1);
       }
       for(const item of [firstItem,copied]){
         expect(visibleCount(staff.id,"aal2","client_training_plan_items",item.id))
-          .toBe(0);
+          .toBe(1);
       }
       const formerStaff=await authenticatedAdminApi(staff,totp);
       try{
         const read=await formerStaff.from("client_training_plan_versions")
           .select("id").eq("id",second.id);
-        if(read.error && read.error.code!=="42501") throw read.error;
-        expect(read.data??[]).toEqual([]);
+        if(read.error) throw read.error;
+        expect(read.data??[]).toEqual([{id:second.id}]);
       }finally{
         await formerStaff.auth.signOut();
       }
       await adminPage.goto(adminRoute);
       await expect(adminPage.getByRole("heading",{name:"Prescrição de treino"}))
-        .toHaveCount(0);
-      await expect(adminPage.getByText("J5 Treino B sintetico",{exact:false}))
-        .toHaveCount(0);
+        .toBeVisible();
+      await expect(adminPage.getByText("J5 Treino B sintetico",{exact:false}).first())
+        .toBeVisible();
 
       // History and exact releases survive deactivation. This does not
       // publish the third draft, alter a nutrition protocol or create feedback.
