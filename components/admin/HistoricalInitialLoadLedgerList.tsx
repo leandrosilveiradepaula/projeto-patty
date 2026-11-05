@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/validation/uuid";
 import { Alert } from "@/components/ui/Alert";
 import { HistoricalFamilyBatchStageForm } from "@/components/admin/HistoricalFamilyBatchStageForm";
+import { HistoricalPhotoStageForm } from "@/components/admin/HistoricalPhotoStageForm";
 import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical-anamnesis-targets";
 import { reconcileHistoricalLedgerPage, type HistoricalLedgerResult } from "@/lib/imports/historical-ledger-reconciliation";
 
@@ -55,6 +56,7 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
       state: string;
       layout_signature_sha256: string | null;
       proposed_client_id: string | null;
+      photo_type: string | null;
     }>;
     counts: Record<string, number>;
     sourceTotal: number;
@@ -62,6 +64,8 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
     photoCount: number;
     stagedReceiptCount: number | null;
     reconciled: readonly HistoricalLedgerResult[];
+    photoReceipts: Array<{ id: string; source_id: string; client_id: string; source_sha256: string; client_file_id: string; state: string }>;
+    photoReceiptsAvailable: boolean;
   } | null = null;
   let detailError = false;
   if (selected) {
@@ -77,7 +81,7 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
       const start = (page - 1) * PAGE_SIZE;
       const [items, ...counts] = await Promise.all([
         db.from("historical_initial_load_sources")
-          .select("source_id, source_sha256, kind, state, layout_signature_sha256, proposed_client_id", { count: "exact" })
+          .select("source_id, source_sha256, kind, state, layout_signature_sha256, proposed_client_id, photo_type", { count: "exact" })
           .eq("batch_id", batch.id)
           .order("source_id", { ascending: true })
           .range(start, start + PAGE_SIZE - 1),
@@ -110,6 +114,10 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
             .select("id", { count: "exact", head: true })
             .eq("batch_id", batch.id),
         ]);
+        const photos = await db.from("historical_photo_imports")
+          .select("id,source_id,client_id,source_sha256,client_file_id,state")
+          .eq("batch_id", batch.id)
+          .in("source_id", rows.length ? rows.map((row) => row.source_id) : ["source_0000"]);
         const available = !receipts.error && !receiptTotal.error;
         const reconciled = reconcileHistoricalLedgerPage(
           rows, available ? (receipts.data ?? []) : null,
@@ -123,6 +131,8 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
           photoCount: counts[STATES.length + 1]?.count ?? 0,
           stagedReceiptCount: available ? (receiptTotal.count ?? null) : null,
           reconciled,
+          photoReceipts: photos.error ? [] : (photos.data ?? []),
+          photoReceiptsAvailable: !photos.error,
         };
       }
     }
@@ -186,7 +196,19 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
                     <td><code>{short(source.layout_signature_sha256)}</code></td>
                     <td>{source.proposed_client_id ? <code>{source.proposed_client_id}</code> : "Sem associação"}</td>
                     <td>
-                      {source.kind !== "xlsx" ? "Foto — guarda não conferida"
+                      {source.kind === "photo"
+                        ? !details.photoReceiptsAvailable ? "Consulta de fotos indisponível"
+                        : (() => {
+                            const matches = details.photoReceipts.filter((p) => p.source_id === source.source_id);
+                            if (matches.length > 1) return "Divergência — bloqueada";
+                            const p = matches[0];
+                            if (!p) return "Foto não guardada";
+                            if (p.client_id !== source.proposed_client_id
+                              || p.source_sha256 !== source.source_sha256
+                              || p.state !== "staged_private") return "Divergência — bloqueada";
+                            return <Link href={`/admin/clientes/${p.client_id}/arquivos?arquivoPendente=${p.client_file_id}`}>Foto guardada — consultar</Link>;
+                          })()
+                        : source.kind !== "xlsx" ? "Categoria não reconhecida"
                         : stage?.status === "saved_private" && stage.receipt_id && stage.client_id
                           ? <Link href={`/admin/clientes/${stage.client_id}/importacao/${stage.receipt_id}`}>Guardada — consultar</Link>
                           : stage?.status === "unavailable" ? "Consulta indisponível"
@@ -203,6 +225,11 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
             <h3>Importar Anamneses históricas da mesma família</h3>
             <p>Selecione um mapa já revisado e confira individualmente cada Excel elegível. A guarda é privada e não libera informações para clientes.</p>
             <HistoricalFamilyBatchStageForm batchId={selected} sources={details.rows} targets={publishedTargets} />
+          </div>
+          <div style={{ display: "grid", gap: "1rem" }}>
+            <h3>Guardar fotos históricas de clientes</h3>
+            <HistoricalPhotoStageForm batchId={selected} sources={details.rows}
+              receipts={details.photoReceipts} available={details.photoReceiptsAvailable && details.sourceTotal === details.count} />
           </div>
           <nav aria-label="Paginação de fontes" style={{ display: "flex", gap: "1rem" }}>
             {page > 1 ? <Link href={`/admin/importacao-inicial?batch=${selected}&page=${page - 1}`}>Página anterior</Link> : null}

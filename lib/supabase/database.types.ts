@@ -1479,6 +1479,72 @@ export type Database = {
           },
         ]
       }
+      historical_photo_imports: {
+        Row: {
+          id: string
+          batch_id: string
+          source_id: string
+          client_id: string
+          source_sha256: string
+          client_file_id: string
+          mime_type: string
+          byte_size: number
+          confirmed_identity: boolean
+          confirmed_photo: boolean
+          confirmed_custody: boolean
+          imported_by_profile_id: string
+          state: string
+          imported_at: string
+        }
+        Insert: {
+          id?: string
+          batch_id: string
+          source_id: string
+          client_id: string
+          source_sha256: string
+          client_file_id: string
+          mime_type: string
+          byte_size: number
+          confirmed_identity: boolean
+          confirmed_photo: boolean
+          confirmed_custody: boolean
+          imported_by_profile_id: string
+          state?: string
+          imported_at?: string
+        }
+        Update: {
+          id?: string
+          batch_id?: string
+          source_id?: string
+          client_id?: string
+          source_sha256?: string
+          client_file_id?: string
+          mime_type?: string
+          byte_size?: number
+          confirmed_identity?: boolean
+          confirmed_photo?: boolean
+          confirmed_custody?: boolean
+          imported_by_profile_id?: string
+          state?: string
+          imported_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_photo_imports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historical_photo_imports_client_file_id_client_id_fkey"
+            columns: ["client_file_id", "client_id"]
+            isOneToOne: true
+            referencedRelation: "client_files"
+            referencedColumns: ["id", "client_id"]
+          },
+        ]
+      }
       historical_anamnesis_imports: {
         Row: {
           id: string
@@ -3677,6 +3743,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      stage_historical_photo_source: {
+        Args: {
+          p_batch_id: string
+          p_source_id: string
+          p_client_id: string
+          p_source_sha256: string
+          p_client_file_id: string
+          p_mime_type: string
+          p_byte_size: number
+          p_actor_profile_id: string
+          p_confirmed_identity: boolean
+          p_confirmed_photo: boolean
+          p_confirmed_custody: boolean
+        }
+        Returns: string
+      }
       stage_historical_anamnesis_source: {
         Args: {
           p_batch_id: string
