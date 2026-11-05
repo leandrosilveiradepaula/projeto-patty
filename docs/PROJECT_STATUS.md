@@ -1,3 +1,13 @@
+## 2026-11-05 — MIGR-HIST-08C: consulta paginada de lotes e fontes para reconciliação (PR em validação)
+
+**Prioridade:** carga inicial de TODO o acervo de Excel e fotos de clientes ativas e inativas. A PR #1092 foi mergeada com CI de aplicação, pgTAP/RLS e onboarding verdes no SHA final. A migration `20261105043500_historical_initial_load_ledger.sql` ainda depende de **apply explícito** via workflow protegido de produção; o `push` em `master` fez apenas o dry-run. Sem migration aplicada, a página deverá informar que os lotes não estão disponíveis, sem alegar gravação de dados reais.
+
+**Entrega 08C em branch:** `/admin/importacao-inicial` passa a listar os 25 lotes de inventário mais recentes usando exclusivamente cliente de sessão e RLS, após `requireRole(admin)` com AAL2. Para lote validado por UUID, consulta seu contador, agrega os quatro estados de pendência e apresenta até 100 fontes opacas por página (`source_id`, SHA truncado, tipo, assinatura de layout truncada e `client_id` proposto ainda não verificado). Paginação e ordenação determinísticas não expõem dados clínicos, nomes, emails, paths ou conteúdo dos arquivos. Erros de consulta são sanitizados. Nenhuma ação escreve, aprova, libera dados ou ativa contas.
+
+**Estados:** código e testes de contrato em branch; Typecheck/build/CI/merge pendentes de comprovação do SHA final; migration SQL da #1092 ainda NÃO aplicada no Supabase SaaS; nenhum lote real ou Excel/foto real processado ou importado; homologação final NÃO. Próxima prioridade única: aplicar schema pelo workflow versionado autorizado, depois implementar custódia segura, aprovação e gravação canônica de todos os registros/fotos do acervo, reconciliando integralmente fontes originais e destinos. Não abrir jornadas paralelas.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-08B: ledger idempotente da carga inicial (PR/CI SQL pendentes)
 
 **Objetivo e prioridade vigentes:** executar a carga inicial de todo o acervo Excel + fotos, separado por fontes e associando a clientes ativas/inativas apenas após revisão, sem ZIP externo. A prévia global 08A foi integrada na PR #1091; o ledger 08B não é ainda importação de dados clínicos.
