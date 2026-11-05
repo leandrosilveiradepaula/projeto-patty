@@ -1,3 +1,15 @@
+## 2026-11-05 — MIGR-HIST-09B: agrupamento operacional de Excel por família (PR em validação)
+
+**Base verificada:** `master=4022597871965188bd90fe7726f2dc4f606d7dde`, PR #1095 mergeada com CI TypeScript, segurança e pgTAP do banco descartável no SHA. A migration nova `20261105121000_historical_anamnesis_private_staging.sql` ainda requer comprovação de aplicação via workflow oficial; não executar SQL ad hoc nem presumir carga real.
+
+**Entrega em branch:** na conferência paginada de um lote, a administração AAL2 pode carregar um **mapa técnico por família de XLSX** (sem respostas), exportado depois da revisão individual existente, filtrar fontes inventariadas com layout idêntico e proposta de `client_id`, selecionar arquivos separados, conferir identidade, significado clínico e custódia **por origem**, e gravar até 5 fontes sequencialmente por acionamento. O SHA de cada arquivo é conferido no navegador; o fluxo usa a rota privada `operation=stage` já implementada na #1095, que revalida SHA/layout/ledger/versão/perguntas, guarda o XLSX original e registra respostas imutáveis de Anamnese histórica via RPC idempotente. A tela apresenta estado individual de gravado/bloqueado sem compartilhar respostas clínicas ou inferir nomes/e-mails.
+
+**Escopo e limites:** reutiliza o modelo e RLS existentes, sem migração/DDL, nova dependência ou serviço. A lista de fontes usa sessão e RLS; `service_role` continua somente no helper servidor. Não cria cliente/conta, não importa consentimento, não altera `anamnesis_submissions`, não publica para a cliente e **não importa fotos, Cadastro Atual, medidas ou avaliações**. Compatibilidade de layout não é prova de identidade nem revisão profissional. A aprovação humana não pode ser pré-marcada.
+
+**Estados:** código implementado/commitado em branch; `test:imports`, typecheck, segurança, build, CI, merge e deploy ainda exigem comprovação. Não foram utilizados Excel/fotos de pessoas reais em testes. Nenhum dado real foi importado nesta entrega. Próxima prioridade única: fotos privadas associadas às origens e às clientes, com custódia/idempotência e reconciliação; depois Cadastro/medidas/avaliações e encerramento de todas as fontes do acervo. Homologação profissional J1–J7 continua por último.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-09A: primeira gravação real de Anamnese histórica privada (PR em validação)
 
 **Contexto:** o sistema Corpo & Mente deve receber a carga inicial de **todos** os Excels e fotos de clientes ativas e inativas, sem ZIP externo. A base do ledger `20261105043500` foi aplicada e verificada no Supabase SaaS via workflow [#42022033938](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/42022033938). PR #1094 de mapeamento por família mergeada e CI verde. Não há evidência de importação real do acervo até aqui.
