@@ -1479,6 +1479,101 @@ export type Database = {
           },
         ]
       }
+      historical_initial_load_batches: {
+        Row: {
+          id: string
+          manifest_sha256: string
+          manifest_metadata: Json
+          source_count: number
+          created_by_profile_id: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id: string
+          manifest_sha256: string
+          manifest_metadata: Json
+          source_count: number
+          created_by_profile_id: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          manifest_sha256?: string
+          manifest_metadata?: Json
+          source_count?: number
+          created_by_profile_id?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_initial_load_batches_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      historical_initial_load_sources: {
+        Row: {
+          batch_id: string
+          source_id: string
+          source_sha256: string
+          kind: string
+          state: string
+          reason: string | null
+          layout_signature_sha256: string | null
+          worksheet_count: number | null
+          photo_type: string | null
+          proposed_client_id: string | null
+          created_at: string
+        }
+        Insert: {
+          batch_id: string
+          source_id: string
+          source_sha256: string
+          kind: string
+          state: string
+          reason?: string | null
+          layout_signature_sha256?: string | null
+          worksheet_count?: number | null
+          photo_type?: string | null
+          proposed_client_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          batch_id?: string
+          source_id?: string
+          source_sha256?: string
+          kind?: string
+          state?: string
+          reason?: string | null
+          layout_signature_sha256?: string | null
+          worksheet_count?: number | null
+          photo_type?: string | null
+          proposed_client_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_initial_load_sources_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "historical_initial_load_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historical_initial_load_sources_proposed_client_id_fkey"
+            columns: ["proposed_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historical_client_registration_requests: {
         Row: {
           request_id: string
@@ -3507,6 +3602,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      register_historical_initial_load_manifest: {
+        Args: {
+          p_batch_id: string
+          p_manifest_sha256: string
+          p_sources: Json
+          p_created_by_profile_id: string
+        }
+        Returns: string
+      }
       register_historical_client_return_request: {
         Args: {
           p_request_id: string
