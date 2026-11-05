@@ -71,7 +71,7 @@ export async function stageHistoricalAnamnesisSource(params: Readonly<{
 
   const published = await getPublishedHistoricalAnamnesisTargets();
   if (!published || published.form_version_id !== params.formVersionId) {
-    blocked("historical_stage_version_changed");
+    throw new Error("historical_stage_version_changed");
   }
   const distinctColumns = new Map<string, { sheet_index: number; column_index: number }>();
   for (const selection of params.selections) {
@@ -92,7 +92,7 @@ export async function stageHistoricalAnamnesisSource(params: Readonly<{
     questions: published.questions,
   });
   if (review.state !== "pending_professional_review" || !review.proposal_sha256) {
-    blocked("historical_stage_mapping_blocked");
+    throw new Error("historical_stage_mapping_blocked");
   }
   const cells = new Map(extracted.cells.map(cell => [
     `${cell.sheet_index}:${cell.column_index}:${cell.row_index}`, cell
@@ -147,7 +147,7 @@ export async function stageHistoricalAnamnesisSource(params: Readonly<{
     p_confirmed_mapping: true,
     p_confirmed_custody: true,
   });
-  if (databaseError || !id) blocked("historical_stage_database_blocked");
+  if (databaseError || !id) throw new Error("historical_stage_database_blocked");
   return {
     import_id: id, state: "staged_private", source_id: params.sourceId,
     answer_count: answers.length,
