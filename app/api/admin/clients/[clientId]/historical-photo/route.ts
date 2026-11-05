@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/supabase/auth";
 import { getClientForPrivateFileAdministration } from "@/lib/files/private-file-admin";
 import { isUuid } from "@/lib/validation/uuid";
 import { stageHistoricalPhotoSource } from "@/lib/imports/historical-photo-server";
+import { detectPrivateFileMimeType } from "@/lib/validation/private-files";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,9 +100,17 @@ export async function POST(
     return response({ error: "historical_photo_confirmation_required" }, 400);
   }
   try {
+    const bytes = new Uint8Array(await photo.arrayBuffer());
+    const detectedMime = detectPrivateFileMimeType(bytes);
+    if ((detectedMime !== "image/jpeg" && detectedMime !== "image/png")
+      || (detectedMime === "image/jpeg" && !/\.jpe?g$/i.test(photo.name))
+      || (detectedMime === "image/png" && !/\.png$/i.test(photo.name))
+      || (photo.type !== "" && photo.type !== detectedMime)) {
+      return response({ error: "unsupported_photo" }, 415);
+    }
     const receipt = await stageHistoricalPhotoSource({
       batchId, sourceId, clientId, sourceSha256: sourceHash,
-      photoBytes: new Uint8Array(await photo.arrayBuffer()),
+      photoBytes: bytes,
       confirmedIdentity: true, confirmedPhoto: true, confirmedCustody: true,
     });
     return response(receipt);
