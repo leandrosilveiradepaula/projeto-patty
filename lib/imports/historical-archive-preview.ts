@@ -639,3 +639,132 @@ export function previewHistoricalDirectFiles(
     excel, photos: uniquePhotos,
   };
 }
+
+
+/**
+ * Read selected raw XLSX cells only after matching the exact workbook bytes
+ * and the structural signature from previewHistoricalDirectFiles.
+ *
+ * This is NOT an importer or a semantic mapping. Returned raw values may
+ * contain sensitive health data: no logging, rendering or telemetry.
+ */
+export function extractHistoricalDirectXlsxCells(
+  excelBytes: Uint8Array,
+  source: Readonly<{ sha256: string; column_signature_sha256: string }>,
+  selectors: readonly Readonly<{ sheet_index: number; column_index: number }>[],
+): Readonly<{
+  state: "raw_unapproved";
+  persistence: "none";
+  source_sha256: string;
+  cells: readonly Readonly<{
+    sheet_index: number;
+    column_index: number;
+    row_index: number;
+    raw_type: "s" | "n" | "str" | "b" | "d" | "inlineStr";
+    raw_value: string;
+  }>[];
+}> {
+  const blocked = (): never => { throw new Error("historical_direct_xlsx_blocked"); };
+  const isHash = (value: unknown): value is string => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+  if (!(excelBytes instanceof Uint8Array) || excelBytes.length < 4
+    || excelBytes.length > DEFAULT_LIMITS.maxUncompressedBytesPerEntry
+    || !source || !isHash(source.sha256) || !isHash(source.column_signature_sha256)
+    || sha256Hex(excelBytes) !== source.sha256
+    || !Array.isArray(selectors) || selectors.length === 0 || selectors.length > 64) blocked();
+  const selected = new Set<string>();
+  for (const item of selectors) {
+    if (!item || !Number.isSafeInteger(item.sheet_index) || item.sheet_index < 0 || item.sheet_index >= 64
+      || !Number.isSafeInteger(item.column_index) || item.column_index < 1 || item.column_index > 16384) blocked();
+    const key = item.sheet_index + ":" + item.column_index;
+    if (selected.has(key)) blocked();
+    selected.add(key);
+  }
+  try {
+    const limits = DEFAULT_LIMITS;
+    const budget: PreviewBudget = {
+      usedBytes: 0, worksheetCount: 0, xmlBytes: 0, cellCount: 0,
+      sharedStringCount: 0, sharedStringBytes: 0,
+    };
+    // Revalidate every nested part with the same limits/fingerprint as preview.
+    const inspected = inspectXlsx(excelBytes, limits, budget);
+    const fingerprint = sha256Hex(new TextEncoder().encode(inspected.columnSignature));
+    if (fingerprint !== source.column_signature_sha256) blocked();
+    const zip = parseZip(excelBytes, limits.maxEntriesPerArchive);
+    const entries = new Map(zip.entries.map((entry) => [entry.name, entry]));
+    if (entries.size !== zip.entries.length) blocked();
+    const sheets = zip.entries.map((entry) => entry.name)
+      .filter((name) => /^xl\/worksheets\/sheet\d+\.xml$/.test(name)).sort();
+    if (sheets.length !== inspected.worksheetCount ||
+      selectors.some((item) => item.sheet_index >= sheets.length)) blocked();
+
+    // Extraction runs after the complete bounded structural preflight.
+    const readXml = (name: string): string => {
+      const entry = entries.get(name);
+      if (!entry || entrySafetyError(entry, limits, 0)
+        || entry.uncompressedSize > limits.maxXmlBytesPerPart) blocked();
+      return decodeUtf8(extractEntry(excelBytes, entry, limits.maxXmlBytesPerPart));
+    };
+    const strings = entries.has("xl/sharedStrings.xml")
+      ? parseSharedStrings(readXml("xl/sharedStrings.xml"), limits, {
+          usedBytes: 0, worksheetCount: 0, xmlBytes: 0, cellCount: 0,
+          sharedStringCount: 0, sharedStringBytes: 0,
+        })
+      : [];
+    const cells: Array<{
+      sheet_index: number; column_index: number; row_index: number;
+      raw_type: "s" | "n" | "str" | "b" | "d" | "inlineStr";
+      raw_value: string;
+    }> = [];
+    for (const [sheetIndex, sheetName] of sheets.entries()) {
+      if (!selectors.some((item) => item.sheet_index === sheetIndex)) continue;
+      const xml = readXml(sheetName);
+      if (/<!DOCTYPE|<!ENTITY/i.test(xml)) blocked();
+      const seen = new Set<string>();
+      const matches = /<c\b([^>]*)>([\s\S]*?)<\/c>/g;
+      for (let match = matches.exec(xml); match; match = matches.exec(xml)) {
+        const attributes = match[1]!;
+        const coords = /(?:^|\s)r="([A-Z]{1,3})([1-9][0-9]{0,6})"/.exec(attributes);
+        if (!coords) blocked(); // Cannot infer a cell position.
+        let col = 0;
+        for (const letter of coords[1]!) col = col * 26 + letter.charCodeAt(0) - 64;
+        if (col < 1 || col > 16384) blocked();
+        const row = Number(coords[2]);
+        const seenKey = col + ":" + row;
+        if (seen.has(seenKey)) blocked();
+        seen.add(seenKey);
+        const body = match[2]!;
+        if (/<f(?:\s|>)/.test(body)) blocked(); // Cached formulas are not historical facts.
+        if (!selected.has(sheetIndex + ":" + col)) continue;
+        const typeMatch = /(?:^|\s)t="([^"]+)"/.exec(attributes);
+        const type = typeMatch?.[1] ?? "n";
+        if (!["s", "n", "str", "b", "d", "inlineStr"].includes(type)) blocked();
+        const raw = /<v>([\s\S]*?)<\/v>/.exec(body)?.[1];
+        let value: string;
+        if (type === "inlineStr") {
+          const inline = /<is>([\s\S]*?)<\/is>/.exec(body)?.[1];
+          if (inline === undefined) blocked();
+          value = [...inline.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)]
+            .map((part) => decodeXml(part[1]!)).join("");
+        } else if (type === "s") {
+          if (raw === undefined || !/^(0|[1-9]\d*)$/.test(raw)
+            || !Number.isSafeInteger(Number(raw)) || Number(raw) >= strings.length) blocked();
+          value = strings[Number(raw)]!;
+        } else {
+          if (raw === undefined) blocked();
+          value = decodeXml(raw);
+        }
+        cells.push({
+          sheet_index: sheetIndex, column_index: col, row_index: row,
+          raw_type: type as "s" | "n" | "str" | "b" | "d" | "inlineStr",
+          raw_value: value,
+        });
+      }
+    }
+    cells.sort((a, b) => a.sheet_index - b.sheet_index
+      || a.row_index - b.row_index || a.column_index - b.column_index);
+    return { state: "raw_unapproved", persistence: "none", source_sha256: source.sha256, cells };
+  } catch {
+    // Never expose parser exception text, XML, filenames or sensitive contents.
+    return blocked();
+  }
+}
