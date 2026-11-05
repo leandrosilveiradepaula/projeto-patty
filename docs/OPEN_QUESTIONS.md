@@ -1,3 +1,18 @@
+## 2026-11-05 — CARGA INICIAL COMPLETA: escopo decidido, gates humanos delimitados
+
+**DECIDIDO:** importar integralmente a base histórica de TODAS as clientes, ativas e inativas, a partir dos arquivos Excel e fotos separados (não ZIP). O sistema está vazio; a finalidade é povoar o sistema, **não** apenas oferecer importação manual por cliente. Essa definição prevalece sobre referências anteriores à importação pontual. A solução técnica fará inventário global, mapeamento por família aprovado, associação explícita ao `Client`, carga em lote idempotente e reconciliação de todo o acervo.
+
+**AINDA ABERTO ANTES DE EXECUTAR SOBRE DADOS REAIS:**
+- Onde se encontra a totalidade do acervo original, como será entregue com permissão de tratamento, guardado de modo privado e mantido para auditoria/retentiva.
+- Como a administração comprovará a identidade de cada fonte Excel/foto e sua associação a um `client_id`, especialmente homônimas, ativos/inativos e clientes sem Auth/Profile.
+- Quais modelos de planilhas efetivamente existem, o significado de cada coluna, tipo, unidade e data e qual registro do sistema deve recebê-la. O mapa canônico da Anamnese atual **não** prova semântica do Excel histórico.
+- Tratamento de registros históricos de saúde/anuência, incluindo data de origem, avaliação, fotos, duplicatas e visibilidade após eventual ativação; não criar aceite retroativo.
+- Aprovação da execução no ambiente correto, por lotes, após teste e revisão, e critérios de aceitação do relatório reconciliado.
+
+**DESENVOLVIMENTO SEM ESPERAR OS GATES:** parser de XLSX direto, fotos separadas e UI auxiliar já existem; 08A prepara a enumeração segura de todo o universo e identificação de duplicidades e famílias. Nenhuma fonte real foi processada e nenhum dado foi carregado em Supabase. Em seguida, staging privado e ledger imutável/idempotente, revisão e persistência por domínio. Não justificar novas jornadas paralelas pela existência dessas decisões pendentes.
+
+---
+
 ## 2026-11-02 — Acesso administrativo global confirmado; rollout parcial verificado
 
 **RESOLVIDO como regra de produto:** o papel relacional `admin` pode acessar todos os dados profissionais de todas as clientes, inclusive históricas/inativas e sem `client_assignment` ativo. Não restringir novamente a consulta administrativa a um índice mínimo nem a uma única pessoa física. MFA AAL2, RLS, Storage privado e auditoria continuam requisitos. Preservação de histórico e revisão/aprovação humana também não mudam.
