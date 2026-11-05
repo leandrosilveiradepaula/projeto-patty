@@ -46,10 +46,11 @@ values
   ('a1000000-0000-0000-0000-000000000001', 'admin'),
   ('a1000000-0000-0000-0000-000000000002', 'client');
 
-insert into public.clients (id, profile_id)
+insert into public.clients (id, profile_id, status)
 values (
   'a2000000-0000-0000-0000-000000000001',
-  'a1000000-0000-0000-0000-000000000002'
+  'a1000000-0000-0000-0000-000000000002',
+  'active'
 );
 
 insert into public.client_assignments (client_id, staff_profile_id)
