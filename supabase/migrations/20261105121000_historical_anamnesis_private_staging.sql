@@ -16,8 +16,14 @@ BEGIN
     RAISE EXCEPTION 'Historical originals bucket is not private and bounded';
   END IF;
 END $guard$;
--- No storage.objects browser policies for this bucket: only the server-held
--- service_role may read/write. Never create a public URL or client release.
+-- A restrictive rule protects this bucket even if other broad permissive
+-- storage policies are introduced later. service_role bypasses RLS in the
+-- server-only trusted path.
+CREATE POLICY historical_originals_never_browser ON storage.objects
+  AS RESTRICTIVE FOR ALL TO public
+  USING (bucket_id <> 'historical-originals-private')
+  WITH CHECK (bucket_id <> 'historical-originals-private');
+-- Never create public URLs or client releases for this bucket.
 
 CREATE TABLE public.historical_anamnesis_imports (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,7 +50,7 @@ CREATE TABLE public.historical_anamnesis_imports (
     ON DELETE RESTRICT,
   CHECK (jsonb_typeof(original_answers) = 'array' AND jsonb_array_length(original_answers) BETWEEN 1 AND 64),
   CHECK (jsonb_typeof(mapping_snapshot) = 'array' AND jsonb_array_length(mapping_snapshot) = jsonb_array_length(original_answers)),
-  CHECK (storage_path ~ '^[0-9a-f-]{36}/source_[0-9]{4}/[a-f0-9]{64}\\.xlsx$')
+  CHECK (storage_path = batch_id::text || '/' || source_id || '/' || source_sha256 || '.xlsx')
 );
 CREATE INDEX historical_anamnesis_imports_client_idx
  ON public.historical_anamnesis_imports(client_id, imported_at DESC);
@@ -140,14 +146,15 @@ BEGIN
     v_answer := p_original_answers->v_index;
     v_map := p_mapping_snapshot->v_index;
     IF jsonb_typeof(v_answer) <> 'object' OR jsonb_typeof(v_map) <> 'object'
-      OR (SELECT count(*) FROM jsonb_object_keys(v_answer)) <> 5
+      OR (SELECT count(*) FROM jsonb_object_keys(v_answer)) <> 6
       OR (SELECT count(*) FROM jsonb_object_keys(v_map)) <> 4
-      OR NOT (v_answer ?& ARRAY['question_id','sheet_index','column_index','row_index','raw_value'])
+      OR NOT (v_answer ?& ARRAY['question_id','sheet_index','column_index','row_index','raw_value','raw_type'])
       OR NOT (v_map ?& ARRAY['question_id','sheet_index','column_index','row_index'])
       OR jsonb_typeof(v_answer->'raw_value') <> 'string'
       OR char_length(v_answer->>'raw_value') NOT BETWEEN 1 AND 4096
       OR position(chr(0) in (v_answer->>'raw_value')) > 0
-      OR NOT (v_answer - 'raw_value' = v_map)
+      OR (v_answer->>'raw_type') NOT IN ('s','n','str','b','d','inlineStr')
+      OR NOT (v_answer - 'raw_value' - 'raw_type' = v_map)
     THEN RAISE EXCEPTION 'Invalid answer snapshot' USING ERRCODE='22023'; END IF;
     BEGIN
       SELECT id, question_key, answer_type, options INTO v_question
