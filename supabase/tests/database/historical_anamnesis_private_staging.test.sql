@@ -83,9 +83,6 @@ SELECT lives_ok($q$
 SELECT is((SELECT count(*) FROM public.historical_anamnesis_imports
  WHERE batch_id='f1700000-0000-4000-8000-000000000001'),1::bigint,
  'Exactly one staged historical source exists');
-SELECT is((SELECT count(*) FROM public.anamnesis_submissions
- WHERE client_id='f1200000-0000-4000-8000-000000000001'),0::bigint,
- 'Historical staging never creates a client-submitted Anamnesis');
 SELECT lives_ok($q$
  SELECT public.stage_historical_anamnesis_source(
  'f1700000-0000-4000-8000-000000000001','source_0001',
@@ -123,6 +120,9 @@ SELECT throws_ok($q$
  'f1100000-0000-4000-8000-000000000001',true,true,false)
  $q$,'42501',NULL,'Custody is a mandatory independent professional decision');
 RESET ROLE;
+SELECT is((SELECT count(*) FROM public.anamnesis_submissions
+ WHERE client_id='f1200000-0000-4000-8000-000000000001'),0::bigint,
+ 'Historical staging never creates a client-submitted Anamnesis');
 
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','f1100000-0000-4000-8000-000000000001',true);
