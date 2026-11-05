@@ -628,7 +628,7 @@ export function previewHistoricalDirectFiles(
   }
   const seen = new Set<string>();
   const uniquePhotos = photos.map((photo) => {
-    if (!photo.sha256) return photo;
+    if (!("sha256" in photo) || !photo.sha256) return photo;
     if (seen.has(photo.sha256)) return { state: "blocked" as const };
     seen.add(photo.sha256);
     return photo;
