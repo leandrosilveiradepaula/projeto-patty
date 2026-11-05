@@ -5,6 +5,8 @@ import { requireRole } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/validation/uuid";
 import { Alert } from "@/components/ui/Alert";
+import { HistoricalFamilyBatchStageForm } from "@/components/admin/HistoricalFamilyBatchStageForm";
+import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical-anamnesis-targets";
 
 const PAGE_SIZE = 100;
 const STATES = [
@@ -24,6 +26,8 @@ const short = (hash: string | null) => hash ? hash.slice(0, 12) + "…" : "—";
 export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) {
   await requireRole("admin"); // Enforce relational admin + MFA AAL2 again.
   const db = await createClient();
+  const publishedTargets = batchId && isUuid(batchId)
+    ? await getPublishedHistoricalAnamnesisTargets() : null;
 
   const { data: batches, error: batchesError } = await db
     .from("historical_initial_load_batches")
@@ -144,6 +148,11 @@ export async function HistoricalInitialLoadLedgerList({ batchId, page }: Props) 
                 ))}
               </tbody>
             </table>
+          </div>
+          <div style={{ display: "grid", gap: "1rem" }}>
+            <h3>Importar Anamneses históricas da mesma família</h3>
+            <p>Selecione um mapa já revisado e confira individualmente cada Excel elegível. A guarda é privada e não libera informações para clientes.</p>
+            <HistoricalFamilyBatchStageForm batchId={selected} sources={details.rows} targets={publishedTargets} />
           </div>
           <nav aria-label="Paginação de fontes" style={{ display: "flex", gap: "1rem" }}>
             {page > 1 ? <Link href={`/admin/importacao-inicial?batch=${selected}&page=${page - 1}`}>Página anterior</Link> : null}
