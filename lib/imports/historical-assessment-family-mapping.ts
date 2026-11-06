@@ -40,8 +40,8 @@ export function parseAssessmentFamilyMapping(value: unknown): AssessmentFamilyMa
       || typeof m.measurement_key !== "string" || !KEY.test(m.measurement_key)
       || typeof m.unit !== "string" || !UNIT.test(m.unit)) blocked();
     const cell = m.sheet_index + ":" + m.column_index + ":" + m.row_index;
-    if (usedCells.has(cell) || usedKeys.has(m.measurement_key)) blocked();
-    usedCells.add(cell); usedKeys.add(m.measurement_key);
+    if (usedCells.has(cell) || usedKeys.has(m.measurement_key as string)) blocked();
+    usedCells.add(cell); usedKeys.add(m.measurement_key as string);
     measurements.push({
       sheet_index:m.sheet_index, column_index:m.column_index, row_index:m.row_index,
       measurement_key:m.measurement_key,unit:m.unit,
