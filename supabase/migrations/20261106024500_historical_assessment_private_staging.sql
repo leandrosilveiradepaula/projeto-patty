@@ -8,7 +8,7 @@ CREATE TABLE public.historical_assessment_imports (
   client_id uuid NOT NULL REFERENCES public.clients(id) ON DELETE RESTRICT,
   source_sha256 text NOT NULL CHECK (source_sha256 ~ '^[a-f0-9]{64}$'),
   layout_signature_sha256 text NOT NULL CHECK (layout_signature_sha256 ~ '^[a-f0-9]{64}$'),
-  assessed_on date NOT NULL CHECK (assessed_on >= '1900-01-01'::date),
+  assessed_on date NOT NULL,
   proposal_sha256 text NOT NULL CHECK (proposal_sha256 ~ '^[a-f0-9]{64}$'),
   storage_path text NOT NULL CHECK (
     storage_path = batch_id::text || '/' || source_id || '/' || source_sha256 || '.xlsx'
@@ -80,7 +80,6 @@ BEGIN
   THEN RAISE EXCEPTION 'Verified administrator and independent decisions required'
        USING ERRCODE='42501'; END IF;
   IF p_batch_id IS NULL OR p_client_id IS NULL OR p_assessed_on IS NULL
-     OR p_assessed_on < '1900-01-01'::date
      OR p_source_id IS NULL OR p_source_id !~ '^source_[0-9]{4}$'
      OR p_source_sha256 IS NULL OR p_source_sha256 !~ '^[a-f0-9]{64}$'
      OR p_layout_signature_sha256 IS NULL
