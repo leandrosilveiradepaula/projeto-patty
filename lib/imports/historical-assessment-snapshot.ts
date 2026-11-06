@@ -22,9 +22,12 @@ export function prepareHistoricalAssessmentSnapshot(input: Readonly<{
   if (!isUuid(input.clientId) || !/^[a-f0-9]{64}$/.test(input.expectedProposalSha256)) blocked();
   const review = reviewHistoricalAssessmentMeasurements(input);
   if (review.state !== "pending_professional_review"
-    || review.proposal_sha256 !== input.expectedProposalSha256) blocked();
+    || !review.proposal_sha256
+    || review.proposal_sha256 !== input.expectedProposalSha256) {
+    throw new Error("historical_assessment_snapshot_blocked");
+  }
   const selected = validateHistoricalMeasurementSelections(input.selections);
-  if (!selected) blocked();
+  if (!selected) throw new Error("historical_assessment_snapshot_blocked");
   const byCell = new Map(input.cells.map((cell) => [
     [cell.sheet_index, cell.column_index, cell.row_index].join(":"), cell,
   ]));
