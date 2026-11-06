@@ -34,8 +34,9 @@ export default async function InitialLoadAdminPage({ searchParams }: {
           <div>
             <h2 id="folder-review-title" className={styles.stepTitle}>Selecionar e conferir a pasta</h2>
             <p className={styles.stepDescription}>
-              Selecione uma vez a pasta principal que contém as pastas de cada cliente.
-              O sistema fará a conferência inicial dos Excel e das fotos, inclusive as organizadas por data.
+              Para testar, escolha diretamente a pasta de uma única cliente, sem copiar arquivos.
+              Depois poderá conferir a pasta principal com todas as clientes.
+              Esta etapa mostra os Excel e as fotos organizadas por data, sem importar nada.
             </p>
           </div>
           <span className={styles.localStatus}>Conferência local</span>
