@@ -43,6 +43,7 @@ export function HistoricalFolderSelectionReview() {
     return d?.sameClient===true&&d.custody===true;
   }).length;
   const complete=review?.state==="ready_for_local_review"
+    && !review.photo_candidates_truncated
     && confirmedPhotos===photos.length
     && confirmedFolders===folders.length;
 
@@ -86,7 +87,10 @@ export function HistoricalFolderSelectionReview() {
         <span className={styles.pickerButton}>Selecionar pasta principal</span>
       </label>
       <p className={styles.privacy}>
-        Conferência privada, sem enviar arquivos. Nenhum cadastro será criado nesta etapa.
+        O navegador pode mostrar “Fazer upload de arquivos” ao selecionar uma pasta.
+        Esse é o aviso padrão do seletor. Nesta etapa, o aplicativo confere apenas
+        nomes de tipos de arquivo, tamanhos e estrutura local: não envia bytes nem
+        registra dados no servidor.
       </p>
     </div>
     {review?.state==="blocked"?<Alert variant="warning" live="assertive">
@@ -94,22 +98,34 @@ export function HistoricalFolderSelectionReview() {
       se há arquivos em formatos incompatíveis ou se os limites foram ultrapassados.
       Código: {review.errors.join(", ")}. Nenhum arquivo foi importado.
     </Alert>:null}
-    {review?.state==="ready_for_local_review"?<div className={styles.review}>
+    {review&&(review.state==="ready_for_local_review"||review.state==="review_with_issues")?<div className={styles.review}>
       <div className={styles.stats} role="status" aria-label="Resumo da pasta selecionada">
         <div className={styles.stat}><strong>{folders.length}</strong><span>Pastas de clientes</span></div>
         <div className={styles.stat}><strong>{review.excels}</strong><span>Planilhas Excel</span></div>
         <div className={styles.stat}><strong>{review.photos}</strong><span>Fotografias</span></div>
       </div>
       <p className={styles.readyNote}>
-        A estrutura foi reconhecida. Esta é apenas uma conferência local: ainda não
-        foram analisados os conteúdos das planilhas, confirmadas as identidades nem
-        importados os arquivos. Não é necessário revisar todas as fotos agora.
+        {review.files.toLocaleString("pt-BR")} arquivos foram enumerados nesta seleção.
+        Esta conferência é local: não lê o conteúdo dos Excel, não verifica identidades,
+        não importa fotografias nem comprova que todos os arquivos do disco foram listados.
+        Não é necessário revisar todas as fotos agora.
       </p>
+      {review.state==="review_with_issues"?<Alert variant="warning" title="Arquivos que precisam de conferência">
+        {review.unsupported_count} arquivo(s) em formato ou localização não reconhecida;
+        {review.oversize_count} acima dos limites da futura importação;
+        {review.client_structure_issues} pasta(s) sem exatamente um Excel.
+        Eles permanecem contados no total. Não mova nem apague os originais.
+      </Alert>:null}
+      {review.photo_candidates_truncated?<p className={styles.readyNote}>
+        A amostra opcional abaixo mostra somente {photos.length} de {review.photos.toLocaleString("pt-BR")}
+        fotos. As demais continuam contabilizadas, mas não foram revisadas.
+        A revisão definitiva será realizada na importação por lotes.
+      </p>:null}
       <details className={styles.details}>
         <summary>Conferência opcional das datas das fotos</summary>
         <div className={styles.detailsBody}>
           <p className={styles.detailsIntro}>
-            As datas indicadas pelas subpastas são apenas sugestões. As confirmações
+            As datas indicadas pelas subpastas são apenas sugestões. Esta lista é uma amostra limitada. As confirmações
             desta seção não são salvas e serão perdidas ao recarregar a página.
             A revisão definitiva ocorrerá na etapa de importação.
           </p>
@@ -178,7 +194,7 @@ export function HistoricalFolderSelectionReview() {
           </div>
           <p className={styles.detailsIntro} role="status">
             Conferidos localmente: {confirmedFolders} de {folders.length} grupos
-            e {confirmedPhotos} de {photos.length} fotos.
+            e {confirmedPhotos} de {review.photos} fotos.
             {complete?" Pré-conferência concluída; sem importação.":" Ainda há verificações opcionais."}
           </p>
         </div>

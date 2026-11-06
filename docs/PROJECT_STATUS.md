@@ -1,3 +1,15 @@
+## 2026-11-06 — MIGR-HIST-18A: conferência de acervo real de 6.453 arquivos (em validação)
+
+**Fato operacional observado:** o administrador selecionou a pasta principal e o navegador anunciou **6.453 arquivos** com sua mensagem nativa "Fazer upload". Isso é comportamento do seletor de diretório e **não equivale ao envio**: o painel de prévia não usa `fetch`, lê apenas metadados e não grava dados. O censo anterior rejeitava acima de 1.200 arquivos ou 300 MB, ainda que sem qualquer upload.
+
+**Correção funcional delimitada:** a prévia local passa a suportar até 30.000 entradas **somente para censo no navegador**, sem limite de soma de bytes do acervo. Contabiliza todos os arquivos enumerados, planilhas, fotos, arquivos de formatos não reconhecidos, limites individuais excedidos e pastas sem exatamente um Excel. Itens incompatíveis ficam como **pendências explícitas**, não descartados nem considerados aptos para importação. Apenas até 60 fotos de exemplo são exibidas na revisão opcional para evitar milhares de controles; as demais permanecem contadas e sem revisão. Datas são sugestões, jamais confirmação clínica automática. Caminhos, nomes e bytes originais não são enviados a servidores nem retornados pelo censo.
+
+**Separação de limites:** ampliar **a leitura de metadados no navegador** não amplia automaticamente o limite do inventário JSON/ledger histórico existente (até 1.200 origens por lote) nem os limites de upload real ou as autorizações de dados de saúde. O processamento verdadeiro exigirá particionamento determinístico em lotes auditáveis, reconciliação global e revisão de identidade/custódia e cronologia; não confundir censo com staging. Nenhum SQL, RLS, schema, upload ou migration alterado.
+
+**Riscos:** navegador pode omitir diretórios vazios e symlinks, e a confirmação "upload" é um aviso nativo do seletor; usar o botão nessa página apenas disponibiliza os metadados localmente no frontend. Um limite extremo de 30.000 é proteção do browser; qualquer acervo acima disso requer nova estratégia. Sem dados reais em teste/CI. Testar CI no SHA antes de merge; publicação e homologação separadas.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-17B: carga inicial com ação principal compreensível (UX impeditiva, em CI)
 
 **Motivo / evidência:** responsável abriu a tela administrativa publicada de carga inicial (PR #1106, `master=d0a1336c`) e mostrou uma captura com duas escolhas de arquivos igualmente expostas (pasta e JSON técnico), instruções extensas e pouca hierarquia, sem distinção funcional entre conferência e importação real. Isto bloqueia o uso confiável e pode induzir erro com dados de saúde. Cartão [#1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6685948253).

@@ -50,31 +50,31 @@ test("unsupported paths, nested Excel, missing/multiple Excel, root mismatch fai
   ];
   for(const entries of cases){
     const result=reviewHistoricalFolderSelection(entries);
-    assert.equal(result.state,"blocked");
-    assert.equal(result.photo_candidates.length,0);
+    assert.ok(result.state==="blocked"||result.state==="review_with_issues");
+    if(result.state==="review_with_issues")assert.ok(result.errors.length>0);
     assert.doesNotMatch(JSON.stringify(result),/PRIVATE_|clinical|medical|\.xlsx/);
   }
 });
-test("file and total budgets and photo folder depth are bounded",()=>{
+test("oversize, unusual depth and many files are explicit inventory issues",()=>{
   assert.equal(reviewHistoricalFolderSelection([
     {relativePath:"ROOT/A/one.xlsx",size:20*1024*1024+1},
-  ]).state,"blocked");
+  ]).state,"review_with_issues");
   assert.equal(reviewHistoricalFolderSelection([
     {relativePath:"ROOT/A/one.xlsx",size:1},
     {relativePath:"ROOT/A/img.jpg",size:10*1024*1024+1},
-  ]).state,"blocked");
+  ]).state,"review_with_issues");
   const deep="ROOT/A/"+Array.from({length:9},(_,i)=>"part"+i).join("/")+"/img.png";
   assert.equal(reviewHistoricalFolderSelection([
     {relativePath:"ROOT/A/one.xlsx",size:1},{relativePath:deep,size:1},
-  ]).state,"blocked");
+  ]).state,"review_with_issues");
   const many=Array.from({length:1201},(_,i)=>({
     relativePath:`ROOT/PERSON/asset${i}.jpg`,size:1,
   }));
-  assert.equal(reviewHistoricalFolderSelection(many).state,"blocked");
+  assert.equal(reviewHistoricalFolderSelection(many).state,"review_with_issues");
   const total=Array.from({length:17},(_,i)=>({
     relativePath:`ROOT/PERSON/chart${i}.xlsx`,size:20*1024*1024,
   }));
-  assert.equal(reviewHistoricalFolderSelection(total).state,"blocked");
+  assert.equal(reviewHistoricalFolderSelection(total).state,"review_with_issues");
 });
 test("UI remains an admin-only ephemeral client-side review without network or original storage",()=>{
   const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../..");
@@ -88,4 +88,39 @@ test("UI remains an admin-only ephemeral client-side review without network or o
   assert.match(ui,/reviewHistoricalFolderSelection/);
   assert.match(ui,/confirm|Confirm/);
   assert.doesNotMatch(ui,/fetch\(|createAdminClient|localStorage|sessionStorage|console\.|indexedDB|navigator\.sendBeacon|\.storage\./);
+});
+
+
+test("real-scale selection of 6453 files does not require splitting into batches for preview",()=>{
+  const entries=[
+    {relativePath:"ROOT/CLIENT_001/excel.xlsx",size:1500},
+    ...Array.from({length:6452},(_,i)=>({
+      relativePath:`ROOT/CLIENT_001/2022-06-18/evolucao${i}.jpg`,size:5500000,
+    })),
+  ];
+  const result=reviewHistoricalFolderSelection(entries);
+  assert.equal(result.state,"ready_for_local_review");
+  assert.equal(result.files,6453);
+  assert.equal(result.excels,1);
+  assert.equal(result.photos,6452);
+  assert.equal(result.folders[0]?.photo_count,6452);
+  assert.equal(result.photo_candidates.length,60);
+  assert.equal(result.photo_candidates_truncated,true);
+  assert.ok(result.bytes>300*1024*1024);
+  assert.doesNotMatch(JSON.stringify(result),/CLIENT_001|evolucao|ROOT/);
+});
+test("unexpected archive formats remain counted as explicit pending items, never imported silently",()=>{
+  const result=reviewHistoricalFolderSelection([
+    {relativePath:"ROOT/CLIENT_HISTORY/table.xlsx",size:100},
+    {relativePath:"ROOT/CLIENT_HISTORY/2022/photo.jpg",size:500},
+    {relativePath:"ROOT/CLIENT_HISTORY/scanned.pdf",size:200},
+    {relativePath:"ROOT/CLIENT_HISTORY/old.xls",size:200},
+  ]);
+  assert.equal(result.state,"review_with_issues");
+  assert.equal(result.files,4);
+  assert.equal(result.excels,1);
+  assert.equal(result.photos,1);
+  assert.equal(result.unsupported_count,2);
+  assert.equal(result.errors[0],"unsupported_files_present");
+  assert.doesNotMatch(JSON.stringify(result),/CLIENT_HISTORY|scanned|\.pdf/);
 });
