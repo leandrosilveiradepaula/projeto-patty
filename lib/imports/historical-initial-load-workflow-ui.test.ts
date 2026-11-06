@@ -18,7 +18,9 @@ test("real screenshot regression: primary user journey shows one clear folder se
   assert.match(page,/Importação definitiva/);
   assert.match(page,/Ainda não disponível/);
   assert.match(page,/HistoricalFolderSelectionReview/);
-  assert.match(picker,/Selecionar pasta principal/);
+  assert.match(picker,/Selecionar pasta para conferir/);
+  assert.match(picker,/diretamente a pasta de uma cliente/);
+  assert.match(page,/sem copiar arquivos/);
   assert.match(picker,/className=\{styles.pickerButton\}/);
   assert.match(picker,/webkitdirectory/);
   assert.match(picker,/webkitRelativePath/);

@@ -48,7 +48,8 @@ export function proposedHistoricalFolderDate(folder:string):string|null {
 }
 /**
  * Reviews all enumerated browser file entries, including files unsupported by
- * the real importer. Never silently omits an item from the census.
+ * the real importer. Supports both root/client/*.xlsx and selected-client/*.xlsx.
+ * Never silently omits an item from the census.
  *
  * Browsers may omit empty folders, junctions and symlinks. A local census is
  * NOT a complete filesystem audit, verified identity, date, SHA or upload.
@@ -59,6 +60,11 @@ export function reviewHistoricalFolderSelection(
   if(!Array.isArray(entries)||entries.length<1||entries.length>MAX_PREVIEW_FILES)
     return blocked("invalid_file_count",Array.isArray(entries)?entries.length:0);
   type MutableGroup={excel_count:number;photo_count:number;proposed_date_count:number};
+  // A directly selected client folder has files immediately under root.
+  // A full archive has its client spreadsheets one directory below root.
+  // Mixed layouts are ambiguous and must not be interpreted as identity.
+  const singleClient=entries.some(e=>typeof e?.relativePath==="string"
+    && e.relativePath.split("/").length===2);
   const groupsByName=new Map<string,MutableGroup>();
   const seen=new Set<string>();
   const photos: Array<{folder:string;date:string|null}>=[];
@@ -69,7 +75,7 @@ export function reviewHistoricalFolderSelection(
       return blocked("invalid_file",entries.length);
     const original=entry.relativePath as string;
     const parts:string[]=original.split("/");
-    if(parts.length<3||parts.some((p:string)=>!p||p==="."||p===".."||p.length>255||unsafe.test(p)))
+    if(parts.length<(singleClient?2:3)||parts.some((p:string)=>!p||p==="."||p===".."||p.length>255||unsafe.test(p)))
       return blocked("invalid_path",entries.length);
     if(root===null)root=parts[0]!;
     if(root!==parts[0]||seen.has(original))
@@ -77,18 +83,22 @@ export function reviewHistoricalFolderSelection(
     seen.add(original);
     bytes+=entry.size;
     if(!Number.isSafeInteger(bytes))return blocked("invalid_total_bytes",entries.length);
-    const folder=parts[1]!;
+    if(singleClient&&XLSX.test(parts[parts.length-1]!)&&parts.length===3)
+      return blocked("ambiguous_mixed_folder_layout",entries.length);
+    const folder=singleClient?parts[0]!:parts[1]!;
     const filename=parts[parts.length-1]!;
+    const excelDepth=singleClient?2:3;
+    const photoDepth=MAX_DEPTH+excelDepth;
     const group=groupsByName.get(folder)??{excel_count:0,photo_count:0,proposed_date_count:0};
     groupsByName.set(folder,group);
-    if(XLSX.test(filename)&&parts.length===3){
+    if(XLSX.test(filename)&&parts.length===excelDepth){
       group.excel_count++;excels++;
       if(entry.size<1||entry.size>MAX_XLSX_BYTES)oversize++;
-    }else if(PHOTO.test(filename)&&parts.length<=MAX_DEPTH+3){
+    }else if(PHOTO.test(filename)&&parts.length<=photoDepth){
       group.photo_count++;photoCount++;
       if(entry.size<1||entry.size>MAX_PHOTO_BYTES)oversize++;
       let date:string|null=null;
-      for(let i=parts.length-2;i>=2;i--){
+      for(let i=parts.length-2;i>=excelDepth-1;i--){
         date=proposedHistoricalFolderDate(parts[i]!);
         if(date)break;
       }

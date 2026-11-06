@@ -1,3 +1,13 @@
+## 2026-11-06 — MIGR-HIST-18B: piloto com pasta de UMA cliente sem copiar arquivos (em validação)
+
+**Fato operacional confirmado:** o responsável optou por conferir uma cliente antes de selecionar o acervo de 6.453 arquivos, para evitar cópias e processamento desnecessários. A pasta original de cada cliente já contém Excel e fotos, inclusive subpastas datadas. Base inicial `master=92b24ce984a723ec9364406ca8dacfd4fae016c5`, com MIGR-HIST-18A integrado e Vercel READY. Cartão [#1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6686813078).
+
+**Mudança pontual:** o seletor de diretório da conferência local passa a aceitar **diretamente a pasta de uma cliente** (`cliente/arquivo.xlsx`, fotos e subpastas datadas) ou a pasta principal (`raiz/cliente/arquivo.xlsx`). Para o piloto com pasta individual, retorna um único grupo opaco, contagem de Excel/fotos e sugestões de datas não confirmadas. Uma seleção mista que contenha Excel diretamente na raiz e também em subpastas é ambígua e bloqueada. Sem cópia de arquivos, ZIP, leitura dos bytes, upload ou armazenamento de caminhos/nome/PII; marcações continuam efêmeras. A UI explica qual pasta escolher. Testes sintéticos de ambos os layouts, ambiguidade, ausência de Excel e preservação das fronteiras.
+
+**Limites e gates:** a seleção é **pré-conferência local**, não importa o Excel nem as fotos; não equivale a revisão final da identidade, custódia, data de evolução, staging privado ou liberação. A aplicação e o armazenamento definitivos ainda dependem da conexão auditável do seletor ao inventário de hashes e à reconciliação de `client_id`/datas. Sem mudanças em schema, RLS, storage, migrations ou endpoints. Homologação J1–J7 permanece a última tarefa.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-18A: conferência de acervo real de 6.453 arquivos (em validação)
 
 **Fato operacional observado:** o administrador selecionou a pasta principal e o navegador anunciou **6.453 arquivos** com sua mensagem nativa "Fazer upload". Isso é comportamento do seletor de diretório e **não equivale ao envio**: o painel de prévia não usa `fetch`, lê apenas metadados e não grava dados. O censo anterior rejeitava acima de 1.200 arquivos ou 300 MB, ainda que sem qualquer upload.
