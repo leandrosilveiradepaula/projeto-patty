@@ -68,7 +68,7 @@ test("mismatched hashes, invalid client, incomplete metadata, extra PII fail clo
     () =>makeVerifiedHistoricalPilotPlan(fingerprint,[{
       ...verified[0]!,original_name:"PRIVATE_FAMILY",
     } as VerifiedPilotSource,verified[1]!],clientId),
-    () =>makeVerifiedHistoricalPilotPlan({...fingerprint,import_allowed:true} as HistoricalPilotFingerprint,verified,clientId),
+    () =>makeVerifiedHistoricalPilotPlan({...fingerprint,import_allowed:true} as unknown as HistoricalPilotFingerprint,verified,clientId),
   ];
   for(const run of changes)assert.throws(run,(error:unknown)=>error instanceof Error
     &&error.message==="historical_pilot_verified_plan_blocked");
