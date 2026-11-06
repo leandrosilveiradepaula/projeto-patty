@@ -18,6 +18,9 @@ type Result = {
   approval?: string;
   proposed_measurement_count?: number;
   proposal_sha256?: string;
+  import_id?: string;
+  source_id?: string;
+  measurement_count?: number;
   sha256?: string;
   column_signature_sha256?: string;
   worksheet_count?: number;
@@ -37,29 +40,45 @@ export function HistoricalAssessmentReviewForm({ clientId }: { clientId: string 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [approvedPreview, setApprovedPreview] = useState<Result | null>(null);
+  const [batchId, setBatchId] = useState("");
+  const [sourceId, setSourceId] = useState("");
+  const [mappingConfirmed, setMappingConfirmed] = useState(false);
+  const [custodyConfirmed, setCustodyConfirmed] = useState(false);
+  const [receipt, setReceipt] = useState<string | null>(null);
 
   function reset(next: File | null) {
     setFile(next); setInspected(null); setIdentity(false); setSelections([]);
     setMessage(null); setApprovedPreview(null); setAssessedOn("");
+    setBatchId(""); setSourceId(""); setMappingConfirmed(false); setCustodyConfirmed(false); setReceipt(null);
   }
-  async function request(operation: "inspect" | "review_measurements") {
+  async function request(operation: "inspect" | "review_measurements" | "stage_measurements") {
     if (busy || !file || !identity || file.size < 1 || file.size > MAX_BYTES
       || !/\.xlsx$/i.test(file.name) || file.name.length > 255) return;
-    if (operation === "review_measurements" &&
-      (!inspected || selections.length < 1 || !assessedOn)) return;
+    if (operation !== "inspect" && (!inspected || selections.length < 1 || !assessedOn)) return;
+    if (operation === "stage_measurements" && (!approvedPreview?.proposal_sha256
+      || !mappingConfirmed || !custodyConfirmed || !/^[0-9a-f-]{36}$/i.test(batchId)
+      || !/^source_[0-9]{4}$/.test(sourceId))) return;
     setBusy(true);
     setMessage(null);
-    setApprovedPreview(null);
+    if (operation !== "stage_measurements") setApprovedPreview(null);
+    setReceipt(null);
     try {
       const body = new FormData();
       body.set("operation", operation);
       body.set("excel", file);
-      if (operation === "review_measurements" && inspected) {
+      if (operation !== "inspect" && inspected) {
         body.set("sha256", inspected.sha256);
         body.set("column_signature_sha256", inspected.column_signature_sha256);
         body.set("assessed_on", assessedOn);
         body.set("measurements", JSON.stringify(selections));
         body.set("confirmed_identity", "true");
+        if (operation === "stage_measurements" && approvedPreview?.proposal_sha256) {
+          body.set("batch_id", batchId);
+          body.set("source_id", sourceId);
+          body.set("proposal_sha256", approvedPreview.proposal_sha256);
+          body.set("confirmed_mapping", "true");
+          body.set("confirmed_custody", "true");
+        }
       }
       const response = await fetch(`/api/admin/clients/${clientId}/historical-excel`, {
         method: "POST", credentials: "same-origin", cache: "no-store", body,
@@ -76,6 +95,11 @@ export function HistoricalAssessmentReviewForm({ clientId }: { clientId: string 
           worksheet_count: result.worksheet_count!,
         });
         setSelections([]);
+      } else if (operation === "stage_measurements") {
+        if (result.state !== "staged_private" || typeof result.import_id !== "string"
+          || result.source_id !== sourceId || result.measurement_count !== selections.length)
+          throw new Error("invalid");
+        setReceipt(result.import_id);
       } else {
         if (result.state !== "pending_professional_review" || result.persistence !== "none"
           || result.approval !== "human_required"
@@ -84,7 +108,7 @@ export function HistoricalAssessmentReviewForm({ clientId }: { clientId: string 
         setApprovedPreview(result);
       }
     } catch {
-      setMessage("A conferência foi bloqueada. Verifique estrutura, células, valores numéricos, data e unidades. Nenhuma avaliação foi gravada.");
+      setMessage("A operação foi bloqueada. Confira arquivo, lote, origem, integridade, células, data e confirmações. Nenhum recibo de guarda foi confirmado.");
       if (operation === "inspect") setInspected(null);
     } finally { setBusy(false); }
   }
@@ -109,6 +133,7 @@ export function HistoricalAssessmentReviewForm({ clientId }: { clientId: string 
       row_index: rowIndex, measurement_key: measurementKey, unit: selectedUnit,
     }]);
     setApprovedPreview(null);
+    setMappingConfirmed(false); setCustodyConfirmed(false); setReceipt(null);
     setMessage(null);
   }
   return (
@@ -119,7 +144,7 @@ export function HistoricalAssessmentReviewForm({ clientId }: { clientId: string 
           disabled={busy} onChange={(e) => reset(e.target.files?.[0] ?? null)} />
       </label>
       <label><input type="checkbox" checked={identity} disabled={!file || busy}
-        onChange={(e) => { setIdentity(e.target.checked); setInspected(null); setSelections([]); setApprovedPreview(null); }} />
+        onChange={(e) => { setIdentity(e.target.checked); setInspected(null); setSelections([]); setApprovedPreview(null); setReceipt(null); }} />
         Confirmei a associação deste Excel à cliente do cadastro, sem deduzir identidade pelo nome do arquivo.
       </label>
       <Button type="button" variant="secondary" disabled={!file || !identity || busy}
@@ -129,7 +154,7 @@ export function HistoricalAssessmentReviewForm({ clientId }: { clientId: string 
           <Alert variant="info">Estrutura conferida. {inspected.worksheet_count} aba(s). SHA-256: <code>{inspected.sha256.slice(0, 12)}…</code>. Valores originais podem ser inspecionados na ferramenta de conferência de Excel acima.</Alert>
           <label>Data real da avaliação (não inventar datas)
             <input type="date" value={assessedOn} disabled={busy}
-              onChange={(e) => { setAssessedOn(e.target.value); setApprovedPreview(null); }} />
+              onChange={(e) => { setAssessedOn(e.target.value); setApprovedPreview(null); setReceipt(null); }} />
           </label>
           <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
             <label>Índice da aba<input type="number" min={0} max={inspected.worksheet_count - 1}
@@ -170,11 +195,43 @@ export function HistoricalAssessmentReviewForm({ clientId }: { clientId: string 
             onClick={() => void request("review_measurements")}>
             Conferir proposta de medidas (sem gravar)
           </Button>
-          {approvedPreview ? <Alert variant="info">
-            Proposta estrutural gerada: {approvedPreview.proposed_measurement_count} medida(s).
-            Identificador técnico <code>{approvedPreview.proposal_sha256?.slice(0, 16)}…</code>.
-            A aprovação do mapeamento e a importação de avaliações ainda são etapas separadas. Nenhuma avaliação foi criada.
-          </Alert> : null}
+          {approvedPreview ? (
+            <>
+              <Alert variant="info">
+                Proposta conferida: {approvedPreview.proposed_measurement_count} medida(s).
+                Identificador técnico <code>{approvedPreview.proposal_sha256?.slice(0, 16)}…</code>.
+                Nenhuma avaliação atual foi criada. Para guardar histórico privado, confira separadamente lote, origem e as decisões abaixo.
+              </Alert>
+              <label>ID do lote já inventariado
+                <input type="text" value={batchId} disabled={busy} placeholder="UUID do lote"
+                  onChange={(e) => { setBatchId(e.target.value.trim()); setReceipt(null); }} />
+              </label>
+              <label>ID da origem Excel no lote
+                <input type="text" value={sourceId} disabled={busy} placeholder="source_0001"
+                  onChange={(e) => { setSourceId(e.target.value.trim()); setReceipt(null); }} />
+              </label>
+              <label><input type="checkbox" checked={mappingConfirmed} disabled={busy}
+                onChange={(e) => setMappingConfirmed(e.target.checked)} />
+                Conferi pessoalmente a data, cada medida, unidade e o significado da planilha original.
+              </label>
+              <label><input type="checkbox" checked={custodyConfirmed} disabled={busy}
+                onChange={(e) => setCustodyConfirmed(e.target.checked)} />
+                Confirmei a autorização, a proveniência e a guarda privada da origem Excel.
+              </label>
+              <Button type="button" loading={busy} disabled={busy || !identity || !mappingConfirmed
+                || !custodyConfirmed || !/^source_[0-9]{4}$/.test(sourceId)
+                || !/^[0-9a-f-]{36}$/i.test(batchId)}
+                onClick={() => void request("stage_measurements")}>
+                Guardar medidas históricas privadas — sem criar avaliação atual
+              </Button>
+            </>
+          ) : null}
+          {receipt ? (
+            <Alert variant="info">
+              Medidas históricas guardadas exclusivamente para a administração.
+              Recibo: <code>{receipt}</code>. Nenhuma avaliação foi finalizada nem publicada.
+            </Alert>
+          ) : null}
         </>
       ) : null}
       {message ? <Alert variant="warning" live="polite">{message}</Alert> : null}
