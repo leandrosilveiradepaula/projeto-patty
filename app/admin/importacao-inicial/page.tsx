@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/supabase/auth";
+import { HistoricalFolderSelectionReview } from "@/components/admin/HistoricalFolderSelectionReview";
 import { HistoricalInitialLoadLedgerForm } from "@/components/admin/HistoricalInitialLoadLedgerForm";
 import { HistoricalInitialLoadLedgerList } from "@/components/admin/HistoricalInitialLoadLedgerList";
 import { HistoricalBatchReconciliationPanel } from "@/components/admin/HistoricalBatchReconciliationPanel";
@@ -27,6 +28,10 @@ export default async function InitialLoadAdminPage({ searchParams }: {
         O arquivo JSON é gerado pela ferramenta local de inventário e contém
         somente identificadores opacos e estados de triagem.
       </Alert>
+      <Section title="Conferir pasta local de clientes e fotografias"
+        description="Selecione a pasta principal no computador e revise a organização e as sugestões de datas das fotos. Nenhum arquivo será enviado nesta prévia.">
+        <HistoricalFolderSelectionReview />
+      </Section>
       <Section
         title="Registrar inventário do lote"
         description="Registre um lote por vez. A gravação confirma somente o recebimento dos metadados; não importa dados de saúde, clientes nem fotografias."
