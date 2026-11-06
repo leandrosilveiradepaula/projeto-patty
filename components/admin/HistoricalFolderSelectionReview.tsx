@@ -72,19 +72,21 @@ export function HistoricalFolderSelectionReview() {
   }
   return <div className={styles.review}>
     <div className={styles.picker}>
-      <p className={styles.pickerTitle}>Escolha a pasta principal dos clientes</p>
+      <p className={styles.pickerTitle}>Escolha uma pasta para conferir</p>
       <p className={styles.pickerHint}>
-        Os arquivos continuarão no seu computador. Selecione a pasta que contém as
-        subpastas com os Excel e as fotografias.
+        Você pode começar selecionando diretamente a pasta de uma cliente,
+        com seu Excel e suas fotos, inclusive em subpastas por data.
+        Depois, a mesma seleção poderá conferir a pasta principal com todas as clientes.
+        Não é necessário copiar nem reorganizar os arquivos.
       </p>
       <label>
         <input type="file" className={styles.fileInput} multiple
-          aria-label="Selecionar pasta principal dos clientes"
+          aria-label="Selecionar a pasta de uma cliente ou a pasta principal de clientes"
           ref={element=>{
             if(element)element.setAttribute("webkitdirectory","");
           }}
           onChange={e=>chooseFiles(e.currentTarget.files)}/>
-        <span className={styles.pickerButton}>Selecionar pasta principal</span>
+        <span className={styles.pickerButton}>Selecionar pasta para conferir</span>
       </label>
       <p className={styles.privacy}>
         O navegador pode mostrar “Fazer upload de arquivos” ao selecionar uma pasta.
