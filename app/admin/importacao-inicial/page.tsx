@@ -3,6 +3,7 @@ import { HistoricalInitialLoadLedgerForm } from "@/components/admin/HistoricalIn
 import { HistoricalInitialLoadLedgerList } from "@/components/admin/HistoricalInitialLoadLedgerList";
 import { HistoricalBatchReconciliationPanel } from "@/components/admin/HistoricalBatchReconciliationPanel";
 import { HistoricalRegistrationFamilyBatchPanel } from "@/components/admin/HistoricalRegistrationFamilyBatchPanel";
+import { HistoricalAssessmentFamilyBatchPanel } from "@/components/admin/HistoricalAssessmentFamilyBatchPanel";
 import { isUuid } from "@/lib/validation/uuid";
 import { Section } from "@/components/ui/Section";
 import { Alert } from "@/components/ui/Alert";
@@ -45,6 +46,12 @@ export default async function InitialLoadAdminPage({ searchParams }: {
         <Section title="Importar Cadastro Histórico por família de Excel"
           description="Reutilize um mapa de células aprovado, confira os arquivos individualmente e guarde até cinco origens por rodada, sem substituir o Cadastro Atual.">
           <HistoricalRegistrationFamilyBatchPanel batchId={batchId} />
+        </Section>
+      ) : null}
+      {batchId ? (
+        <Section title="Importar avaliações históricas por família de Excel"
+          description="Reutilize coordenadas e unidades aprovadas; informe e revise cada data real por origem. A guarda é exclusivamente histórica e privada.">
+          <HistoricalAssessmentFamilyBatchPanel batchId={batchId} />
         </Section>
       ) : null}
       <Alert variant="warning" title="Ainda não é a importação definitiva">

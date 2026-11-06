@@ -1,3 +1,15 @@
+## 2026-11-06 — MIGR-HIST-15A: avaliações históricas por família XLSX e múltiplas datas (em validação)
+
+**Base auditada:** `master=6d0b11725b261bfb62a36c15802a6202637b9c3a` (PR #1103 integrada). Cartão operacional na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6676788136). Checkout local indisponível nesta sessão; alterações feitas em branch GitHub, não na `master` sem CI. Migrations 09A/10A/11B/12A seguem pendentes de aplicação protegida; verificar o SaaS antes de declarar alteração de estado.
+
+**Entrega proposta:** no painel `/admin/importacao-inicial?batch=<UUID>`, admin AAL2 consulta inventário integral e os quatro domínios de recibos sob sessão RLS, recusando qualquer falha, conflito, divergência e origem não vinculada. Um mapa técnico estrito `historical-assessment-family-v1` contém exclusivamente assinatura XLSX, coordenadas, chaves das medidas e unidades explicitamente revisadas, sem dados de cliente, valores, respostas, datas ou arquivo original. Cada XLSX separado é conferido por SHA e vinculado a fonte do ledger. Para cada origem, há até quatro entradas de datas distintas por rodada, com confirmação humana independente da identidade, semântica/data/unidade e custódia, e prévia `review_measurements` sem persistência. Uma segunda ação guarda **até cinco avaliações** por rodada, sequencialmente, via `stage_measurements`, apresentando recibo por origem+data. A mesma origem pode ter históricos em várias datas ou guarda já existente; RPC existente mantém idempotência e bloqueia divergência.
+
+**Limites:** não há ZIP, novas tabelas/migrations/RLS, Auth, atualização de avaliação atual, Cadastro Atual, ativação ou publicação. Não se presume identidade pelo layout; não se inferem datas/unidades. Nenhum Excel ou foto real processado, nenhuma migration aplicada e nenhuma homologação realizada por esta entrega. Um recibo é apenas histórico privado, não avaliação clínica final.
+
+**Verificações exigidas:** testes sintéticos do mapa técnico, colisões/PII, data múltipla, integridade SHA, revisão separada da guarda, consultas integrais e gates de RLS; TypeScript, `test:imports`, segurança e build no commit exato da PR. Estados de CI, merge, publicação e produção pendentes até evidência. Próxima prioridade: aplicar migrations pendentes **somente** via workflow protegido e concluir carga real e reconciliação integral de Excel+fotos quando acervo autorizado estiver disponível; homologação humana J1–J7 será a última atividade.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-14A: Cadastro Histórico por família XLSX com revisão de cada origem (em CI)
 
 **Base:** `master=ba129bf6e8e0b6348fc7a513931dc330a48c60fa`, PR #1102 mergeada e CI pós-merge #42155092312 aprovada. Cartão operacional na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6676538577). Ledger 08B aplicado no SaaS, mas migrations 09A/10A/11B/12A seguem pendentes de apply protegido; não aplicar por SQL ad hoc.
