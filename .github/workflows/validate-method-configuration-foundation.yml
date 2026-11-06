@@ -149,6 +149,9 @@ jobs:
       - name: Run private historical photo staging pgTAP
         run: npx supabase test db supabase/tests/database/historical_photo_private_staging.test.sql
 
+      - name: Run private historical assessment staging pgTAP
+        run: npx supabase test db supabase/tests/database/historical_assessment_private_staging.test.sql
+
       - name: Run admin global historical assessment lifecycle pgTAP
         run: npx supabase test db supabase/tests/database/admin_global_assessment_lifecycle.test.sql
 

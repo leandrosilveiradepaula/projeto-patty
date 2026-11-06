@@ -1,3 +1,13 @@
+## 2026-11-06 — MIGR-HIST-11B: guarda imutável de medidas de avaliações históricas (em validação)
+
+**Escopo:** a conferência 11A foi mergeada na #1099 com CI da `master` #42149808042 aprovada. Nesta entrega, a mesma interface admin AAL2 passa a receber três decisões humanas distintas (identidade, correspondência de data/chave/unidade, custódia) e lote/origem explícitos. A rota `stage_measurements` revalida arquivo XLSX, SHA/layout, células e proposta e confirma vínculo ao ledger via sessão RLS antes de guardar. O original é salvo em `historical-originals-private` (`upsert:false`; replay compara bytes) e a RPC invoker `stage_historical_assessment_source` exclusiva de `service_role` guarda `historical_assessment_imports`, com valores originais, mapeamento, hash, data, autoria e associações, idempotência por lote+origem+data; a lista administrativa por Cliente exibe só metadados do recibo. São permitidas várias datas para o mesmo XLSX, sem transformar uma fonte histórica em avaliação clínica atual. Nenhum `client_assessments`/`assessment_measurements`/`client_registration`, Auth, consentimento ou publicação é criado.
+
+**Controles:** migration nova `20261106024500_historical_assessment_private_staging.sql`, tabela RLS SELECT somente admin MFA AAL2 e nenhum INSERT/UPDATE/DELETE de browser; SQL comprova fonte, cliente, SHA, data, numérico/colisões e decisões humanas; pgTAP sintético inclui replay, cliente errado, conflito, admin sem MFA, cliente comum e nenhum impacto nas avaliações atuais. Rota limita corpo/multpart e não devolve valores de saúde; não há nova dependência nem alteração de migration já aplicada.
+
+**Gates/estados:** código em branch; testes e CI/pgTAP/merge ainda precisam de evidência. Não aplicar migration de 11B nem as pendentes 09A/10A no SaaS fora do workflow oficial protegido. Não foram processados dados reais. A responsável deve confirmar semântica, data e unidade das fontes reais; staging não é avaliação profissional finalizada. Próxima prioridade após esta entrega: staging de Cadastro Atual histórico separado da conta Auth, depois reconciliação global do acervo Excel e fotos quando disponível. Homologação conjunta J1–J7 é última tarefa.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-11A: conferência de medidas de avaliação histórica sem gravação
 
 **Base verificada:** `master=7977fd877299280d6b7e8bf546ebd7dba274167a`, PR #1098 e 3 checks anteriores aprovados. Migrations 09A e 10A seguem ausentes no histórico remoto de Supabase (run #42122942818 foi dry-run, não apply). O acervo real Excel + fotos continua não localizado de forma suficiente para a carga inicial.

@@ -1545,6 +1545,74 @@ export type Database = {
           },
         ]
       }
+      historical_assessment_imports: {
+        Row: {
+          id: string
+          batch_id: string
+          source_id: string
+          client_id: string
+          source_sha256: string
+          layout_signature_sha256: string
+          assessed_on: string
+          proposal_sha256: string
+          storage_path: string
+          original_measurements: Json
+          mapping_snapshot: Json
+          confirmed_identity: boolean
+          confirmed_mapping: boolean
+          confirmed_custody: boolean
+          imported_by_profile_id: string
+          state: string
+          imported_at: string
+        }
+        Insert: {
+          id?: string
+          batch_id: string
+          source_id: string
+          client_id: string
+          source_sha256: string
+          layout_signature_sha256: string
+          assessed_on: string
+          proposal_sha256: string
+          storage_path: string
+          original_measurements: Json
+          mapping_snapshot: Json
+          confirmed_identity: boolean
+          confirmed_mapping: boolean
+          confirmed_custody: boolean
+          imported_by_profile_id: string
+          state?: string
+          imported_at?: string
+        }
+        Update: {
+          id?: string
+          batch_id?: string
+          source_id?: string
+          client_id?: string
+          source_sha256?: string
+          layout_signature_sha256?: string
+          assessed_on?: string
+          proposal_sha256?: string
+          storage_path?: string
+          original_measurements?: Json
+          mapping_snapshot?: Json
+          confirmed_identity?: boolean
+          confirmed_mapping?: boolean
+          confirmed_custody?: boolean
+          imported_by_profile_id?: string
+          state?: string
+          imported_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historical_assessment_imports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historical_anamnesis_imports: {
         Row: {
           id: string
@@ -3755,6 +3823,25 @@ export type Database = {
           p_actor_profile_id: string
           p_confirmed_identity: boolean
           p_confirmed_photo: boolean
+          p_confirmed_custody: boolean
+        }
+        Returns: string
+      }
+      stage_historical_assessment_source: {
+        Args: {
+          p_batch_id: string
+          p_source_id: string
+          p_client_id: string
+          p_source_sha256: string
+          p_layout_signature_sha256: string
+          p_assessed_on: string
+          p_proposal_sha256: string
+          p_storage_path: string
+          p_mapping_snapshot: Json
+          p_original_measurements: Json
+          p_actor_profile_id: string
+          p_confirmed_identity: boolean
+          p_confirmed_mapping: boolean
           p_confirmed_custody: boolean
         }
         Returns: string
