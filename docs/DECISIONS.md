@@ -1,3 +1,18 @@
+## 2026-11-06 — Estrutura real do acervo: pastas de clientes e fotos por data
+
+### FATO CONFIRMADO PELO RESPONSÁVEL / DECISÃO DE PRODUTO
+
+O acervo inicial está organizado em uma **pasta principal** com subpastas nomeadas por cliente. Cada subpasta de cliente contém **um Excel**, fotografias e outras subpastas identificadas por datas, que contêm fotografias de evolução. A importação deve aceitar a **pasta principal com toda sua hierarquia**, sem exigir reorganização, ZIP ou envio manual de cada arquivo. Pode haver fotos diretamente na pasta da cliente. Os nomes de pasta são evidência contextual para conciliação, **não identificadores canônicos ou autorização automática**.
+
+A data nominal de uma subpasta deve ser preservada como **indício da data da foto**, distinto da data efetiva de captura, da data de avaliação e de metadados EXIF. Não converter automaticamente uma pasta datada em avaliação/reavaliação nem publicar a foto; vínculo cronológico a confirmar por pessoa autorizada. Fotos de evolução devem permanecer associadas ao histórico da cliente e à revisão temporal, sem perder a organização das fontes originais.
+
+### DECISÃO TÉCNICA INCREMENTAL
+
+O inventário offline anterior aceitava somente `excel/*.xlsx` e `fotos/*`; ele passa a aceitar também subpastas por cliente e pastas de fotos aninhadas, mantendo **o contrato do plano de inventário já existente**, que é deliberadamente livre de caminhos, nomes e datas. A varredura inicial **não persistirá nem publicará** a hierarquia nominal ou datas de pastas no manifesto e não inferirá `client_id` de nomes. Uma etapa posterior deverá oferecer **revisão local e auditável da correspondência entre foto/origem e data**, para preservar a cronologia no destino privado após aprovação sem enviar PII no manifesto inicial. Até lá, não considerar a migração cronológica concluída.
+
+Regra inalterada: todos os Excel e fotos das clientes ativas e inativas integram a carga inicial; dados originais, vinculações e fotos continuam privados e revisados. Migration aplicada, plano gerado, recibo de staging e homologação são estados diferentes.
+
+---
 ## 2026-11-05 — Carga inicial integral de todo o acervo da consultoria
 
 ### REGRA DE PRODUTO CONFIRMADA PELO RESPONSÁVEL — PREVALECE SOBRE INTERPRETAÇÃO DE IMPORTAÇÃO PONTUAL
