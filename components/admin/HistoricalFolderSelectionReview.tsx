@@ -96,7 +96,7 @@ export function HistoricalFolderSelectionReview() {
       </p>
     </div>
     {review?.state==="blocked"?<Alert variant="warning" live="assertive">
-      A pasta não pôde ser conferida. Verifique se cada pasta de cliente contém um Excel,
+      A pasta não pôde ser conferida. Verifique se o caminho é válido, se cada pasta de cliente contém um Excel,
       se há arquivos em formatos incompatíveis ou se os limites foram ultrapassados.
       Código: {review.errors.join(", ")}. Nenhum arquivo foi importado.
     </Alert>:null}
@@ -113,10 +113,12 @@ export function HistoricalFolderSelectionReview() {
         Não é necessário revisar todas as fotos agora.
       </p>
       {review.state==="review_with_issues"?<Alert variant="warning" title="Arquivos que precisam de conferência">
-        {review.unsupported_count} arquivo(s) em formato ou localização não reconhecida;
+        {review.unsupported_count} arquivo(s) em formato ou localização não reconhecida
+        (incluindo {review.nested_excel_count} planilha(s) Excel em subpastas);
         {review.oversize_count} acima dos limites da futura importação;
-        {review.client_structure_issues} pasta(s) sem exatamente um Excel.
-        Eles permanecem contados no total. Não mova nem apague os originais.
+        {review.client_structure_issues} pasta(s) sem exatamente um Excel principal.
+        Todos permanecem contados. Nenhum arquivo adicional é associado ou importado
+        automaticamente. Não mova nem apague os originais.
       </Alert>:null}
       {review.photo_candidates_truncated?<p className={styles.readyNote}>
         A amostra opcional abaixo mostra somente {photos.length} de {review.photos.toLocaleString("pt-BR")}
