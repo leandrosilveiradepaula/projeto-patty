@@ -159,14 +159,18 @@ test("single client folder can show incomplete Excel or unsupported types as unr
   assert.equal(result.client_structure_issues,1);
   assert.doesNotMatch(JSON.stringify(result),/PRIVATE_CLIENT|notes/);
 });
-test("mixed root-level client files and deeper client spreadsheets do not masquerade as one client",()=>{
+test("mixed root-level and nested Excel are counted, never auto-associated",()=>{
   const result=reviewHistoricalFolderSelection([
     {relativePath:"PRIVATE_ROOT/loose.xlsx",size:4000},
     {relativePath:"PRIVATE_ROOT/CLIENT_B/historical.xlsx",size:4000},
   ]);
-  assert.equal(result.state,"blocked");
-  assert.deepEqual(result.errors,["ambiguous_mixed_folder_layout"]);
-  assert.equal(result.folders.length,0);
+  assert.equal(result.state,"review_with_issues");
+  assert.equal(result.files,2);
+  assert.equal(result.excels,1);
+  assert.equal(result.nested_excel_count,1);
+  assert.equal(result.unsupported_count,1);
+  assert.deepEqual(result.errors,["unsupported_files_present","nested_excel_needs_review"]);
+  assert.equal(result.folders.length,1);
   assert.doesNotMatch(JSON.stringify(result),/PRIVATE_ROOT|CLIENT_B|loose/);
 });
 test("single-client direct select and full archive select both preserve pure metadata boundaries",()=>{
@@ -184,4 +188,36 @@ test("single-client direct select and full archive select both preserve pure met
   assert.deepEqual(direct.photo_candidates,full.photo_candidates);
   assert.equal(direct.bytes,full.bytes);
   assert.equal(direct.photos,full.photos);
+});
+
+
+test("pilot with a primary Excel and nested historical Excel keeps all files and photo dates visible",()=>{
+  const result=reviewHistoricalFolderSelection([
+    {relativePath:"PRIVATE_PERSON/primary.xlsx",size:50000},
+    {relativePath:"PRIVATE_PERSON/2023-09-17/evolution.jpg",size:10000},
+    {relativePath:"PRIVATE_PERSON/2022-04-03/old_measurements.xlsx",size:5000},
+    {relativePath:"PRIVATE_PERSON/2023-09-17/side.png",size:9000},
+  ]);
+  assert.equal(result.state,"review_with_issues");
+  assert.equal(result.files,4);
+  assert.equal(result.excels,1);
+  assert.equal(result.photos,2);
+  assert.equal(result.unsupported_count,1);
+  assert.equal(result.nested_excel_count,1);
+  assert.deepEqual(result.photo_candidates.map(x=>x.proposed_date),
+    ["2023-09-17","2023-09-17"]);
+  assert.doesNotMatch(JSON.stringify(result),/PRIVATE_PERSON|old_measurements|evolution|primary/);
+});
+test("multiple nested Excel files remain pending and never become principal silently",()=>{
+  const result=reviewHistoricalFolderSelection([
+    {relativePath:"PRIVATE_PERSON/2022/old.xlsx",size:1000},
+    {relativePath:"PRIVATE_PERSON/2023/other.xlsx",size:1000},
+    {relativePath:"PRIVATE_PERSON/photo.jpg",size:1000},
+  ]);
+  assert.equal(result.state,"review_with_issues");
+  assert.equal(result.files,3);
+  assert.equal(result.excels,0);
+  assert.equal(result.nested_excel_count,2);
+  assert.equal(result.client_structure_issues,1);
+  assert.equal(result.unsupported_count,2);
 });
