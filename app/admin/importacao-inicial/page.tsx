@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/supabase/auth";
+import { listClientsForPrivateFileAdministration } from "@/lib/files/private-file-admin";
 import { HistoricalFolderSelectionReview } from "@/components/admin/HistoricalFolderSelectionReview";
 import { HistoricalInitialLoadLedgerForm } from "@/components/admin/HistoricalInitialLoadLedgerForm";
 import { HistoricalInitialLoadLedgerList } from "@/components/admin/HistoricalInitialLoadLedgerList";
@@ -16,6 +17,11 @@ export default async function InitialLoadAdminPage({ searchParams }: {
   searchParams: Promise<{ batch?: string; page?: string }>;
 }) {
   await requireRole("admin"); // Server-side relational role and MFA AAL2.
+  const clients=await listClientsForPrivateFileAdministration();
+  const clientChoices=clients.map(client=>({id:client.id,
+    label:(client.full_name?.trim()||client.profiles?.display_name?.trim()||"Cliente sem nome informado")+
+      (client.status==="inactive"?" · Inativa":" · Ativa"),
+  }));
   const query = await searchParams;
   const batchId = typeof query.batch === "string" && isUuid(query.batch) ? query.batch : undefined;
   const page = typeof query.page === "string" && /^(?:[1-9]|1[0-2])$/.test(query.page)
@@ -42,7 +48,7 @@ export default async function InitialLoadAdminPage({ searchParams }: {
           <span className={styles.localStatus}>Conferência local</span>
         </div>
         <div className={styles.stepBody}>
-          <HistoricalFolderSelectionReview />
+          <HistoricalFolderSelectionReview clientChoices={clientChoices} />
         </div>
       </section>
       <section className={styles.nextStep} aria-labelledby="next-step-title">
