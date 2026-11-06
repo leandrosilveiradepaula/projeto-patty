@@ -1,3 +1,13 @@
+## 2026-11-05 — MIGR-HIST-11A: conferência de medidas de avaliação histórica sem gravação
+
+**Base verificada:** `master=7977fd877299280d6b7e8bf546ebd7dba274167a`, PR #1098 e 3 checks anteriores aprovados. Migrations 09A e 10A seguem ausentes no histórico remoto de Supabase (run #42122942818 foi dry-run, não apply). O acervo real Excel + fotos continua não localizado de forma suficiente para a carga inicial.
+
+**Entrega:** reutiliza `/api/admin/clients/[clientId]/historical-excel` com nova operação `review_measurements` somente admin MFA AAL2+mesma origem, respeitando o limite de leitura de XLSX e conferindo hash/layout. A interface de importação do Client permite escolher Excel, confirmar identidade manual, data de avaliação real, cada coordenada da medida, chave e unidade explícitas (sem inferência). Parser extrai células reais e rejeita ausências, colisões, fórmulas e números ambíguos. A revisão devolve só contagem, estado pendente e SHA da proposta baseado também nos valores brutos, sem enviar valores na resposta; valores continuam no escopo temporário da requisição. Não cria `client_assessments`, `assessment_measurements`, `client_registration`, Storage, login/consentimento ou liberação para cliente.
+
+**Limites e gates:** a proposta não é importação, nem confirmação de unidade/semântica clínica; Patty precisa aprovar os mapeamentos reais antes de futura persistência/versionamento. Sem novas migrations/RLS/permissões, dependências ou dados reais. Testes sintéticos de datas/números/colisões e fronteiras, CI/typecheck/imports/segurança/build e merge precisam de evidência no head. Não aplicar migrations remotas fora do workflow oficial; homologação geral J1–J7 continua por último.
+
+---
+
 ## 2026-11-05 — MIGR-HIST-10A: staging privado de fotos históricas por origem de inventário (em validação)
 
 **Contexto e prioridade:** a administração autorizou continuar o desenvolvimento sem arquivos reais disponíveis. A carga inicial integral de clientes ativas/inativas segue prioritária; quando o acervo estiver disponível deverá ser reconciliado em sua totalidade. `master` base `58e7320a46ecbf9ffe74bd757adc5420b99ee640` (PR #1097 integrada, CI pós-merge aprovada).

@@ -5,6 +5,7 @@ import { isUuid } from "@/lib/validation/uuid";
 import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical-anamnesis-targets";
 import { reviewHistoricalDirectAnamnesisMapping, type HistoricalCellSelection } from "@/lib/imports/historical-direct-anamnesis-mapping";
 import { stageHistoricalAnamnesisSource } from "@/lib/imports/historical-anamnesis-server";
+import { reviewHistoricalAssessmentMeasurements, validateHistoricalMeasurementSelections } from "@/lib/imports/historical-assessment-review";
 import {
   extractHistoricalDirectXlsxCells,
   previewHistoricalDirectFiles,
@@ -108,6 +109,8 @@ export async function POST(
         ? ["operation", "excel", "sha256", "column_signature_sha256", "form_version_id", "mappings"]
         : operation === "stage"
           ? ["operation", "excel", "sha256", "column_signature_sha256", "form_version_id", "mappings", "batch_id", "source_id", "confirmed_identity", "confirmed_mapping", "confirmed_custody"]
+          : operation === "review_measurements"
+            ? ["operation", "excel", "sha256", "column_signature_sha256", "assessed_on", "measurements", "confirmed_identity"]
           : [];
   if (allowed.length === 0 || [...form.keys()].some((key) => !allowed.includes(key))
     || allowed.some((key) => form!.getAll(key).length !== 1)) {
@@ -143,6 +146,32 @@ export async function POST(
       || sha256 !== preview.excel.sha256
       || signature !== preview.excel.column_signature_sha256) {
       return response({ error: "excel_source_changed" }, 409);
+    }
+    if (operation === "review_measurements") {
+      if (form.get("confirmed_identity") !== "true") {
+        return response({ error: "historical_measurement_identity_required" }, 400);
+      }
+      const on = form.get("assessed_on");
+      const encoded = form.get("measurements");
+      if (typeof on !== "string" || typeof encoded !== "string" || encoded.length > 16_384) {
+        return response({ error: "invalid_measurement_mapping" }, 400);
+      }
+      let supplied: unknown;
+      try { supplied = JSON.parse(encoded); }
+      catch { return response({ error: "invalid_measurement_mapping" }, 400); }
+      const selected = validateHistoricalMeasurementSelections(supplied);
+      if (!selected) return response({ error: "invalid_measurement_mapping" }, 400);
+      const columnMap = new Map<string, { sheet_index: number; column_index: number }>();
+      for (const item of selected) columnMap.set(item.sheet_index + ":" + item.column_index, {
+        sheet_index: item.sheet_index, column_index: item.column_index,
+      });
+      const cells = extractHistoricalDirectXlsxCells(bytes,
+        { sha256, column_signature_sha256: signature }, [...columnMap.values()]);
+      const review = reviewHistoricalAssessmentMeasurements({
+        clientId: client.id, sourceSha256: sha256, layoutSha256: signature,
+        assessedOn: on, cells: cells.cells, selections: selected,
+      });
+      return response(review, review.state === "blocked" ? 422 : 200);
     }
     if (operation === "map" || operation === "stage") {
       const versionId = form.get("form_version_id");
