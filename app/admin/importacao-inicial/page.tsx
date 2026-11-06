@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/supabase/auth";
 import { HistoricalInitialLoadLedgerForm } from "@/components/admin/HistoricalInitialLoadLedgerForm";
 import { HistoricalInitialLoadLedgerList } from "@/components/admin/HistoricalInitialLoadLedgerList";
+import { HistoricalBatchReconciliationPanel } from "@/components/admin/HistoricalBatchReconciliationPanel";
 import { isUuid } from "@/lib/validation/uuid";
 import { Section } from "@/components/ui/Section";
 import { Alert } from "@/components/ui/Alert";
@@ -33,6 +34,12 @@ export default async function InitialLoadAdminPage({ searchParams }: {
       <Section title="Lotes registrados e pendências" description="Consulte as origens de cada lote, os arquivos bloqueados ou sem vínculo e os totais para reconciliação.">
         <HistoricalInitialLoadLedgerList batchId={batchId} page={page} />
       </Section>
+      {batchId ? (
+        <Section title="Reconciliação integral por lote e domínio"
+          description="Consulta todas as origens, além da página atual, e compara recibos de Anamnese, avaliações, Cadastro Histórico e fotos.">
+          <HistoricalBatchReconciliationPanel batchId={batchId} />
+        </Section>
+      ) : null}
       <Alert variant="warning" title="Ainda não é a importação definitiva">
         Cada fonte deverá passar por conciliação humana de identidade,
         mapeamento de campos, autorização de custódia e reconciliação.
