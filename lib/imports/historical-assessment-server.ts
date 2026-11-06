@@ -29,7 +29,7 @@ export async function stageHistoricalAssessmentSource(input: Readonly<{
     || !(input.excelBytes instanceof Uint8Array)
     || input.excelBytes.byteLength < 1 || input.excelBytes.byteLength > 20 * 1024 * 1024) blocked();
   const selected = validateHistoricalMeasurementSelections(input.selections);
-  if (!selected) blocked();
+  if (!selected) throw new Error("historical_assessment_stage_blocked");
   const session = await createClient();
   const { data: source, error: sourceError } = await session.from("historical_initial_load_sources")
     .select("kind,state,proposed_client_id,source_sha256,layout_signature_sha256")
@@ -75,7 +75,7 @@ export async function stageHistoricalAssessmentSource(input: Readonly<{
     p_actor_profile_id:profileId,p_confirmed_identity:true,
     p_confirmed_mapping:true,p_confirmed_custody:true,
   });
-  if(rpcError || !receiptId) blocked();
+  if(rpcError || !receiptId) throw new Error("historical_assessment_stage_blocked");
   return {import_id:receiptId,state:"staged_private",
     source_id:input.sourceId,measurement_count:snapshot.originals.length};
 }
