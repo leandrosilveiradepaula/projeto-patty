@@ -108,6 +108,7 @@ export function HistoricalFolderSelectionReview() {
         {review.files.toLocaleString("pt-BR")} arquivos foram enumerados nesta seleção.
         Esta conferência é local: não lê o conteúdo dos Excel, não verifica identidades,
         não importa fotografias nem comprova que todos os arquivos do disco foram listados.
+        Não é necessário revisar todas as fotos agora.
       </p>
       {review.state==="review_with_issues"?<Alert variant="warning" title="Arquivos que precisam de conferência">
         {review.unsupported_count} arquivo(s) em formato ou localização não reconhecida;
