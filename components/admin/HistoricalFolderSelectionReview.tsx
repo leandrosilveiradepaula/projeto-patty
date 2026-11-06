@@ -28,6 +28,8 @@ export function HistoricalFolderSelectionReview() {
   const [photoChoices,setPhotoChoices]=useState<Record<number,PhotoChoice>>({});
   const [folderChoices,setFolderChoices]=useState<Record<number,FolderChoice>>({});
   const [notice,setNotice]=useState("");
+  const [selectedFolderName,setSelectedFolderName]=useState<string|null>(null);
+  const [hideFolderName,setHideFolderName]=useState(false);
   const photos=review?.photo_candidates??[];
   const folders=review?.folders??[];
   const confirmedPhotos=photos.filter(p=>{
@@ -49,7 +51,17 @@ export function HistoricalFolderSelectionReview() {
 
   function chooseFiles(files:FileList|null) {
     setReview(null);setPhotoChoices({});setFolderChoices({});setNotice("");
+    setSelectedFolderName(null);setHideFolderName(false);
     if(!files||files.length===0)return;
+    // webkitRelativePath exposes only the selected directory name and relative
+    // children, never a local absolute path. Keep this PII ONLY in client state.
+    const firstPath=files[0]?.webkitRelativePath;
+    const firstFolder=firstPath?.split("/")[0]??"";
+    if(firstFolder.length>0 && firstFolder.length<=255
+      && !/[\\\\\\u0000-\\u001f\\u007f]/.test(firstFolder)
+      && Array.from(files).every(file=>file.webkitRelativePath.startsWith(firstFolder+"/"))) {
+      setSelectedFolderName(firstFolder);
+    }
     // Only use names and relative paths inside a pure in-memory review call.
     // No File object or path is stored in React state or sent over the network.
     const scanned=reviewHistoricalFolderSelection(Array.from(files,file=>({
@@ -95,6 +107,24 @@ export function HistoricalFolderSelectionReview() {
         registra dados no servidor.
       </p>
     </div>
+    {selectedFolderName?<section className={styles.folderIdentity}
+      aria-label="Identificação local da pasta selecionada">
+      <div className={styles.folderIdentityText}>
+        <strong>Pasta selecionada</strong>
+        <p className={styles.folderName} aria-live="polite">
+          {hideFolderName?"Nome oculto para privacidade":selectedFolderName}
+        </p>
+        <p className={styles.folderNote}>
+          Nome fornecido pelo navegador, não o caminho completo do computador.
+          Apenas conferência local: nenhum arquivo foi importado.
+        </p>
+      </div>
+      <button type="button" className={styles.folderPrivacyButton}
+        aria-pressed={hideFolderName}
+        onClick={()=>setHideFolderName(value=>!value)}>
+        {hideFolderName?"Mostrar nome":"Ocultar nome"}
+      </button>
+    </section>:null}
     {review?.state==="blocked"?<Alert variant="warning" live="assertive">
       A pasta não pôde ser conferida. Verifique se o caminho é válido, se cada pasta de cliente contém um Excel,
       se há arquivos em formatos incompatíveis ou se os limites foram ultrapassados.
