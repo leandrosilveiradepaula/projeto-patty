@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { lstat, open, readdir, readFile } from "node:fs/promises";
+import { lstat, open, readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
@@ -10,8 +10,14 @@ import {
 
 const MAX_FILES = 1200;
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 300 * 1024 * 1024;
 const MAX_DECISION_BYTES = 256 * 1024;
+const MAX_CLIENT_FOLDERS = 1200;
+const MAX_PHOTO_FOLDERS = 2400;
+const MAX_DATE_FOLDER_DEPTH = 8;
+const EXCEL = /\.xlsx$/i;
+const PHOTO = /\.(jpg|jpeg|png)$/i;
 
 export class InitialLoadLocalError extends Error {
   constructor() {
@@ -37,41 +43,108 @@ async function safeReadFile(file: string, maxBytes: number) {
 }
 
 /**
- * Local offline census of an entire source archive.
- * Input structure:
- *   root/excel/*.xlsx
- *   root/fotos/*.{jpg,jpeg,png}
- * Optional decisions JSON contains only {sha256,client_id}, NEVER names/emails.
- * No ZIP input, recursive traversal, network, database or writes.
+ * Offline-only inventory. Accepts TWO organizational layouts:
+ *   legacy: root/excel/*.xlsx and root/fotos/*.{jpg,jpeg,png}
+ *   actual: root/<client-folder>/<one>.xlsx, photos at that level,
+ *           plus photo-only subfolders (which may represent dates).
+ *
+ * Directory names are never proof of client identity or photo capture date.
+ * None of the source names, paths, or date-folder labels enter the output.
+ * The existing metadata-only plan remains the only output, without uploads.
  */
 export async function planHistoricalLocalInitialLoad(rootDirectory: string, decisionsPath?: string) {
   try {
     const root = resolve(rootDirectory);
     const rootStat = await lstat(root);
     if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) throw new InitialLoadLocalError();
-    const rootEntries = await readdir(root, { withFileTypes: true });
-    if (rootEntries.length !== 2 || rootEntries.some((item) =>
-      !item.isDirectory() || item.isSymbolicLink()
-      || !["excel", "fotos"].includes(item.name))) throw new InitialLoadLocalError();
+
+    const entries = await readdir(root, { withFileTypes: true });
+    if (!entries.length) throw new InitialLoadLocalError();
+    const isLegacy = entries.length === 2
+      && entries.every(item => item.isDirectory() && !item.isSymbolicLink()
+        && ["excel", "fotos"].includes(item.name));
 
     const assets: InitialLoadAsset[] = [];
     let total = 0;
-    for (const [directory, kind, extension] of [
-      ["excel", "xlsx", /\.xlsx$/i],
-      ["fotos", "photo", /\.(jpg|jpeg|png)$/i],
-    ] as const) {
-      const folder = join(root, directory);
-      const folderStat = await lstat(folder);
-      if (!folderStat.isDirectory() || folderStat.isSymbolicLink()) throw new InitialLoadLocalError();
-      const entries = await readdir(folder, { withFileTypes: true });
-      if (assets.length + entries.length > MAX_FILES) throw new InitialLoadLocalError();
-      if (entries.some((entry) => !entry.isFile() || entry.isSymbolicLink()
-        || !extension.test(entry.name))) throw new InitialLoadLocalError();
-      for (const entry of entries) {
-        const bytes = await safeReadFile(join(folder, entry.name), MAX_FILE_BYTES);
-        total += bytes.length;
-        if (total > MAX_TOTAL_BYTES) throw new InitialLoadLocalError();
-        assets.push({ kind: kind === "xlsx" ? "xlsx" : "photo", bytes });
+    let photoFolders = 0;
+
+    async function addFile(file: string, kind: InitialLoadAsset["kind"]) {
+      if (assets.length >= MAX_FILES) throw new InitialLoadLocalError();
+      const bytes = await safeReadFile(file, kind === "photo" ? MAX_PHOTO_BYTES : MAX_FILE_BYTES);
+      total += bytes.byteLength;
+      if (total > MAX_TOTAL_BYTES) throw new InitialLoadLocalError();
+      assets.push({ kind, bytes });
+    }
+
+    if (isLegacy) {
+      for (const [folder, kind, extension] of [
+        ["excel", "xlsx", EXCEL], ["fotos", "photo", PHOTO],
+      ] as const) {
+        const directory = join(root, folder);
+        const stat = await lstat(directory);
+        if (!stat.isDirectory() || stat.isSymbolicLink()) throw new InitialLoadLocalError();
+        const files = await readdir(directory, { withFileTypes: true });
+        if (assets.length + files.length > MAX_FILES
+          || files.some(item => !item.isFile() || item.isSymbolicLink() || !extension.test(item.name)))
+          throw new InitialLoadLocalError();
+        for (const file of files) await addFile(join(directory, file.name), kind);
+      }
+    } else {
+      // The top-level directories are *hints*, not associations with Client IDs.
+      if (entries.length > MAX_CLIENT_FOLDERS
+        || entries.some(item => !item.isDirectory() || item.isSymbolicLink()))
+        throw new InitialLoadLocalError();
+
+      async function scanPhotoFolder(directory: string, depth: number): Promise<number> {
+        photoFolders += 1;
+        if (photoFolders > MAX_PHOTO_FOLDERS || depth > MAX_DATE_FOLDER_DEPTH)
+          throw new InitialLoadLocalError();
+        const stat = await lstat(directory);
+        if (!stat.isDirectory() || stat.isSymbolicLink()) throw new InitialLoadLocalError();
+        const children = await readdir(directory, { withFileTypes: true });
+        if (!children.length) throw new InitialLoadLocalError();
+        let found = 0;
+        for (const child of children) {
+          if (child.isSymbolicLink()) throw new InitialLoadLocalError();
+          const location = join(directory, child.name);
+          if (child.isFile() && PHOTO.test(child.name)) {
+            await addFile(location, "photo");
+            found++;
+          } else if (child.isDirectory()) {
+            found += await scanPhotoFolder(location, depth + 1);
+          } else {
+            // Never silently skip an unexpected clinical document or format.
+            throw new InitialLoadLocalError();
+          }
+        }
+        return found;
+      }
+
+      for (const folder of entries) {
+        const clientDirectory = join(root, folder.name);
+        const clientStat = await lstat(clientDirectory);
+        if (!clientStat.isDirectory() || clientStat.isSymbolicLink()) throw new InitialLoadLocalError();
+        const children = await readdir(clientDirectory, { withFileTypes: true });
+        const excels = children.filter(item => item.isFile() && EXCEL.test(item.name));
+        // One Excel per client directory is an input-shape check, NOT identity proof.
+        if (excels.length !== 1) throw new InitialLoadLocalError();
+        let photos = 0;
+        for (const item of children) {
+          if (item.isSymbolicLink()) throw new InitialLoadLocalError();
+          const location = join(clientDirectory, item.name);
+          if (item.isFile() && EXCEL.test(item.name)) {
+            await addFile(location, "xlsx");
+          } else if (item.isFile() && PHOTO.test(item.name)) {
+            await addFile(location, "photo");
+            photos++;
+          } else if (item.isDirectory()) {
+            photos += await scanPhotoFolder(location, 1);
+          } else {
+            throw new InitialLoadLocalError();
+          }
+        }
+        // A client may have an Excel with no photos; an empty dated folder is forbidden.
+        void photos;
       }
     }
     if (!assets.length) throw new InitialLoadLocalError();
@@ -92,14 +165,14 @@ export async function planHistoricalLocalInitialLoad(rootDirectory: string, deci
     }
     return planHistoricalInitialLoad(assets, associations);
   } catch {
-    // Never leak paths, filenames or text from an original health record.
+    // Never leak source paths, date-folder labels, filenames, or health data.
     throw new InitialLoadLocalError();
   }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   if (process.argv.length < 3 || process.argv.length > 4) {
-    process.stderr.write("Uso: node --experimental-strip-types scripts/plan-historical-initial-load.ts <pasta-com-excel-e-fotos> [decisoes.json]\n");
+    process.stderr.write("Uso: node --experimental-strip-types scripts/plan-historical-initial-load.ts <pasta-com-clientes> [decisoes.json]\n");
     process.exitCode = 2;
   } else {
     planHistoricalLocalInitialLoad(process.argv[2]!, process.argv[3])
