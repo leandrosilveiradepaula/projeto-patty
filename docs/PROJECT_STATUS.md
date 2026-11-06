@@ -1,3 +1,15 @@
+## 2026-11-06 — MIGR-HIST-19A: identificação SHA-256 no navegador de UMA cliente (em CI)
+
+**Evidência de campo:** seleção individual mostrou 16 arquivos (1 Excel principal, 3 Excel aninhados em subpastas e 12 fotos). Pasta e datas foram identificadas como candidatos, porém o navegador só apresentava censo por metadados; não havia impressão digital de conteúdo para reconciliação da origem. Decisão vigente é o piloto de uma única cliente antes do acervo integral, sem cópia de pasta/ZIP.
+
+**Implementação em branch:** botão separado **Identificar arquivos desta cliente** exige ação expressa do admin AAL2, lê sequencialmente os arquivos originais no navegador para calcular hashes reais Web Crypto SHA-256 de todas as fontes (inclusive 3 Excel adicionais) e prepara resumo canônico de `source_0001..`, com número de Excel principal, extras pendentes, fotos, origens binárias duplicadas e hash global opaco. Os caminhos, nomes de cliente, fotos, conteúdo clínico e datas de pasta não entram no resultado, URL, log ou rede. Os bytes de cada arquivo permanecem somente em memória durante o cálculo local; não existe exportação, upload nem gravação. Nova seleção limpa resultado antigo.
+
+**Limites específicos do piloto:** somente uma pasta com exatamente um Excel raiz; até 1.200 arquivos/300MB, Excel até 20MB, foto até 10MB, formatos `.xlsx`, `.jpg/.jpeg/.png` e no máximo 8 níveis de foto. Arquivos desconhecidos/limites excedidos/múltiplas clientes bloqueiam esse cálculo; o censo estrutural anterior permanece disponível e mostra todos como pendências. SHA e duplicatas são evidência de origem, não identidade nem consentimento. Estruturas XLSX e magic bytes serão validados na fase posterior com o backend existente.
+
+**Estados e limites:** não é manifesto oficial `historical-initial-load-plan-v1`, não registra ledger, não cria Client e não conclui importação; identidade, autorização de custódia, significado das 4 planilhas e 12 datas seguem revisão humana obrigatória. Testes sintéticos da estabilidade ao ordenamento, duplicatas, 16 arquivos, limites e privacidade; CI/merge/publicação devem ser evidenciados separadamente. **Próxima entrega funcional:** integrar as fontes com o validador seguro já existente, ledger e staging autorizado da primeira cliente, depois reconciliar globalmente 6.453 fontes. Homologação J1–J7 por último.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-18D: identificação local da pasta selecionada para conferência (em CI)
 
 **Evidência:** piloto real de uma cliente enumerou 16 arquivos (1 Excel na raiz, 12 fotos, 3 Excel adicionais aninhados em revisão), mas a interface não informava a pasta selecionada. O responsável solicitou que o endereço aparecesse. Navegadores não fornecem o caminho absoluto do disco no seletor `webkitdirectory`, apenas a raiz de `webkitRelativePath`, metadado potencialmente identificador da cliente. Cartão de execução registrado na issue #1008 antes da implementação.

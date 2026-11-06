@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import styles from "./HistoricalFolderSelectionReview.module.css";
+import {fingerprintHistoricalPilotFiles,type HistoricalPilotFingerprint} from "@/lib/imports/historical-pilot-local-digest";
 import {
   isValidHistoricalPhotoDate,
   reviewHistoricalFolderSelection,
@@ -27,6 +28,10 @@ export function HistoricalFolderSelectionReview() {
   const [review,setReview]=useState<HistoricalFolderReview|null>(null);
   const [photoChoices,setPhotoChoices]=useState<Record<number,PhotoChoice>>({});
   const [folderChoices,setFolderChoices]=useState<Record<number,FolderChoice>>({});
+  const filesRef=useRef<File[]>([]);
+  const [fingerprint,setFingerprint]=useState<HistoricalPilotFingerprint|null>(null);
+  const [fingerprintBusy,setFingerprintBusy]=useState(false);
+  const [fingerprintError,setFingerprintError]=useState(false);
   const [notice,setNotice]=useState("");
   const [selectedFolderName,setSelectedFolderName]=useState<string|null>(null);
   const [hideFolderName,setHideFolderName]=useState(false);
@@ -51,8 +56,10 @@ export function HistoricalFolderSelectionReview() {
 
   function chooseFiles(files:FileList|null) {
     setReview(null);setPhotoChoices({});setFolderChoices({});setNotice("");
+    filesRef.current=[];setFingerprint(null);setFingerprintError(false);
     setSelectedFolderName(null);setHideFolderName(false);
     if(!files||files.length===0)return;
+    filesRef.current=Array.from(files);
     // webkitRelativePath exposes only the selected directory name and relative
     // children, never a local absolute path. Keep this PII ONLY in client state.
     const firstPath=files[0]?.webkitRelativePath;
@@ -70,6 +77,25 @@ export function HistoricalFolderSelectionReview() {
     setReview(scanned);
     if(scanned.state==="blocked"){
       setNotice("Esta seleção foi bloqueada. Confira estrutura, extensões, limites e um Excel por pasta de cliente.");
+    }
+  }
+
+  async function calculateLocalFingerprint() {
+    // The trust-boundary scanner below is not a verified ledger. Never upload
+    // or persist any result and never infer a Client from a folder name.
+    if(fingerprintBusy||!review||filesRef.current.length!==review.files
+      ||filesRef.current.length>1200||folders.length!==1
+      ||review.state==="blocked"||review.unsupported_count!==review.nested_excel_count
+      ||review.oversize_count!==0||review.client_structure_issues!==0
+      ||review.excels!==1||review.bytes>300*1024*1024)return;
+    setFingerprintBusy(true);setFingerprintError(false);setFingerprint(null);
+    try{
+      const result=await fingerprintHistoricalPilotFiles(filesRef.current);
+      setFingerprint(result);
+    }catch{
+      setFingerprintError(true);
+    }finally{
+      setFingerprintBusy(false);
     }
   }
   function patchPhoto(id:number,change:Partial<PhotoChoice>) {
@@ -155,6 +181,46 @@ export function HistoricalFolderSelectionReview() {
         fotos. As demais continuam contabilizadas, mas não foram revisadas.
         A revisão definitiva será realizada na importação por lotes.
       </p>:null}
+      <section className={styles.digestPanel} aria-label="Identificação técnica local dos arquivos">
+        <h3>Preparação do inventário desta cliente</h3>
+        <p>
+          Podemos calcular uma impressão digital SHA-256 de cada arquivo selecionado,
+          inclusive das planilhas adicionais. Essa leitura só acontece ao clicar
+          no botão abaixo; não envia conteúdos, nomes nem caminhos ao servidor.
+          As planilhas extras continuam pendentes de análise profissional.
+        </p>
+        <button type="button" className={styles.digestButton}
+          disabled={fingerprintBusy||review.files>1200||review.bytes>300*1024*1024
+            ||folders.length!==1||review.excels!==1
+            ||review.unsupported_count!==review.nested_excel_count
+            ||review.oversize_count!==0||review.client_structure_issues!==0}
+          onClick={()=>void calculateLocalFingerprint()}>
+          {fingerprintBusy?"Calculando no navegador...":"Identificar arquivos desta cliente"}
+        </button>
+        {fingerprintError?<Alert variant="warning" live="assertive">
+          A identificação local não foi concluída. Nenhum arquivo foi importado.
+          Não altere os originais; confira os formatos e limites.
+        </Alert>:null}
+        {fingerprint?<div role="status" className={styles.digestSummary}>
+          <strong>Identificação local concluída — sem gravação</strong>
+          <p>{fingerprint.source_count} fontes: {fingerprint.principal_excel_count} Excel principal,
+            {" "}{fingerprint.additional_excel_count} Excel adicionais pendentes e
+            {" "}{fingerprint.photo_count} fotos.</p>
+          <p>{fingerprint.duplicate_binary_count} arquivos com conteúdo duplicado, mantidos
+            como origens separadas para revisão.</p>
+          <p>Referência técnica local: <code>{fingerprint.inventory_sha256.slice(0,16)}…</code></p>
+          <p>Essa referência não é autorização, identificação da cliente, recibo de
+            importação nem confirmação das datas das fotos.</p>
+        </div>:null}
+        {(review.files>1200||review.bytes>300*1024*1024||folders.length!==1
+          ||review.unsupported_count!==review.nested_excel_count
+          ||review.client_structure_issues!==0||review.oversize_count!==0
+          ||review.excels!==1)?<p className={styles.digestHint}>
+            Para esta etapa segura, escolha uma única pasta de cliente com um
+            Excel principal e sem arquivos fora dos tipos suportados.
+            Arquivos extras permanecem contados e não são descartados.
+          </p>:null}
+      </section>
       <details className={styles.details}>
         <summary>Conferência opcional das datas das fotos</summary>
         <div className={styles.detailsBody}>

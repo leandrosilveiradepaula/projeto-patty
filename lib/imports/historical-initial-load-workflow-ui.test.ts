@@ -71,3 +71,21 @@ test("selected folder label is local only, toggled for private screenshots and n
   assert.doesNotMatch(picker,/fetch\(|console\.|localStorage|sessionStorage|sendBeacon|indexedDB/);
   assert.doesNotMatch(picker,/client_id|createClient|window\.location|\.storage\./);
 });
+
+
+test("single-client cryptographic census requires a separate explicit local click",()=>{
+  const digest=read("lib/imports/historical-pilot-local-digest.ts");
+  assert.match(picker,/fingerprintHistoricalPilotFiles\(filesRef\.current\)/);
+  assert.match(picker,/Identificar arquivos desta cliente/);
+  assert.match(picker,/onClick=\{\(\)=>void calculateLocalFingerprint\(\)\}/);
+  assert.match(picker,/filesRef\.current=Array\.from\(files\)/);
+  assert.match(picker,/filesRef\.current=\[\]/);
+  assert.match(picker,/setFingerprint\(null\)/);
+  assert.match(picker,/review\.unsupported_count!==review\.nested_excel_count/);
+  assert.match(picker,/review\.bytes>300\*1024\*1024/);
+  assert.match(digest,/crypto\.subtle\.digest\("SHA-256"/);
+  assert.match(digest,/additional_xlsx_pending_review/);
+  assert.match(digest,/persistence: "none"/);
+  assert.doesNotMatch(digest,/fetch\(|localStorage|sessionStorage|console\.|indexedDB|sendBeacon|\/api\//);
+  assert.doesNotMatch(picker,/fetch\(|localStorage|sessionStorage|console\.|indexedDB|sendBeacon/);
+});
