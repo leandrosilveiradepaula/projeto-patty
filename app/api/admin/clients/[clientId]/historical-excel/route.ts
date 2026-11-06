@@ -7,6 +7,8 @@ import { reviewHistoricalDirectAnamnesisMapping, type HistoricalCellSelection } 
 import { stageHistoricalAnamnesisSource } from "@/lib/imports/historical-anamnesis-server";
 import { reviewHistoricalAssessmentMeasurements, validateHistoricalMeasurementSelections } from "@/lib/imports/historical-assessment-review";
 import { stageHistoricalAssessmentSource } from "@/lib/imports/historical-assessment-server";
+import { prepareHistoricalRegistrationReview, validateHistoricalRegistrationSelections } from "@/lib/imports/historical-registration-review";
+import { stageHistoricalRegistrationSource } from "@/lib/imports/historical-registration-server";
 import {
   extractHistoricalDirectXlsxCells,
   previewHistoricalDirectFiles,
@@ -114,6 +116,10 @@ export async function POST(
             ? ["operation", "excel", "sha256", "column_signature_sha256", "assessed_on", "measurements", "confirmed_identity"]
           : operation === "stage_measurements"
             ? ["operation", "excel", "sha256", "column_signature_sha256", "assessed_on", "measurements", "proposal_sha256", "batch_id", "source_id", "confirmed_identity", "confirmed_mapping", "confirmed_custody"]
+          : operation === "review_registration"
+            ? ["operation", "excel", "sha256", "column_signature_sha256", "fields", "confirmed_identity"]
+          : operation === "stage_registration"
+            ? ["operation", "excel", "sha256", "column_signature_sha256", "fields", "proposal_sha256", "batch_id", "source_id", "confirmed_identity", "confirmed_mapping", "confirmed_custody"]
           : [];
   if (allowed.length === 0 || [...form.keys()].some((key) => !allowed.includes(key))
     || allowed.some((key) => form!.getAll(key).length !== 1)) {
@@ -149,6 +155,55 @@ export async function POST(
       || sha256 !== preview.excel.sha256
       || signature !== preview.excel.column_signature_sha256) {
       return response({ error: "excel_source_changed" }, 409);
+    }
+    if (operation === "review_registration" || operation === "stage_registration") {
+      if (form.get("confirmed_identity") !== "true") {
+        return response({ error: "historical_registration_identity_required" }, 400);
+      }
+      const encoded = form.get("fields");
+      if (typeof encoded !== "string" || encoded.length > 8192) {
+        return response({ error: "invalid_registration_mapping" }, 400);
+      }
+      let submitted: unknown;
+      try { submitted = JSON.parse(encoded); }
+      catch { return response({ error: "invalid_registration_mapping" }, 400); }
+      const selections = validateHistoricalRegistrationSelections(submitted);
+      if (!selections) return response({ error: "invalid_registration_mapping" }, 400);
+      const cols = new Map<string, { sheet_index: number; column_index: number }>();
+      for (const s of selections) cols.set(s.sheet_index + ":" + s.column_index, {
+        sheet_index: s.sheet_index, column_index: s.column_index,
+      });
+      const extracted = extractHistoricalDirectXlsxCells(bytes,
+        { sha256, column_signature_sha256: signature }, [...cols.values()]);
+      const evidence = prepareHistoricalRegistrationReview({
+        clientId: client.id, sourceSha256: sha256, layoutSha256: signature,
+        cells: extracted.cells, selections,
+      });
+      if (operation === "review_registration") {
+        return response(evidence.review, evidence.review.state === "blocked" ? 422 : 200);
+      }
+      const batchId = form.get("batch_id");
+      const sourceId = form.get("source_id");
+      const expected = form.get("proposal_sha256");
+      if (typeof batchId !== "string" || !isUuid(batchId)
+        || typeof sourceId !== "string" || !/^source_[0-9]{4}$/.test(sourceId)
+        || typeof expected !== "string" || !HASH.test(expected)
+        || expected !== evidence.review.proposal_sha256
+        || form.get("confirmed_mapping") !== "true"
+        || form.get("confirmed_custody") !== "true") {
+        return response({ error: "historical_registration_confirmation_required" }, 400);
+      }
+      try {
+        const receipt = await stageHistoricalRegistrationSource({
+          batchId, sourceId, clientId: client.id, excelBytes: bytes,
+          sourceSha256: sha256, layoutSha256: signature,
+          selections, proposalSha256: expected,
+          confirmedIdentity: true, confirmedMapping: true, confirmedCustody: true,
+        });
+        return response(receipt);
+      } catch {
+        return response({ error: "historical_registration_stage_blocked" }, 422);
+      }
     }
     if (operation === "review_measurements" || operation === "stage_measurements") {
       if (form.get("confirmed_identity") !== "true") {

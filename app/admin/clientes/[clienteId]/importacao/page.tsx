@@ -7,6 +7,8 @@ import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { HistoricalExcelReviewForm } from "@/components/admin/HistoricalExcelReviewForm";
 import { HistoricalAssessmentReviewForm } from "@/components/admin/HistoricalAssessmentReviewForm";
 import { HistoricalAssessmentStagedList } from "@/components/admin/HistoricalAssessmentStagedList";
+import { HistoricalRegistrationReviewForm } from "@/components/admin/HistoricalRegistrationReviewForm";
+import { HistoricalRegistrationStagedList } from "@/components/admin/HistoricalRegistrationStagedList";
 import { HistoricalAnamnesisStagedList } from "@/components/admin/HistoricalAnamnesisStagedList";
 import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileUploadForm";
 import { Section } from "@/components/ui/Section";
@@ -52,14 +54,21 @@ export default async function HistoricalClientImportPage({
       <Section title="4. Medidas históricas guardadas" description="Recibos privados por data, lote e origem. Esses registros não constituem avaliações finalizadas.">
         <HistoricalAssessmentStagedList clientId={client.id} />
       </Section>
-      <Section title="5. Adicionar fotos à cliente" description="Escolha a categoria Foto. Cada imagem enviada fica vinculada a este cadastro interno, inclusive se a cliente estiver inativa. O envio é individual e mantém os arquivos ocultos até liberação explícita.">
+      <Section title="5. Conferir Cadastro Histórico de Excel" description="Dados de contato históricos, sem alterar o Cadastro Atual, login ou acompanhamento.">
+        <HistoricalRegistrationReviewForm clientId={client.id} />
+      </Section>
+      <Section title="6. Cadastros históricos guardados" description="Recibos privados por lote e origem; nenhum registro é publicado para a cliente.">
+        <HistoricalRegistrationStagedList clientId={client.id} />
+      </Section>
+      <Section title="7. Adicionar fotos à cliente" description="Escolha a categoria Foto. Cada imagem enviada fica vinculada a este cadastro interno, inclusive se a cliente estiver inativa. O envio é individual e mantém os arquivos ocultos até liberação explícita.">
         <AdminPrivateFileUploadForm clientId={client.id} />
       </Section>
       <Alert variant="warning" title="Carga inicial completa ainda pendente">
         Esta página permite guardar Anamnese histórica de uma origem Excel reconciliada
-        e conferir e guardar medidas históricas de origens reconciliadas, sem criar avaliações atuais.
-        A carga inicial de Cadastro Atual, medidas, avaliações e fotos do acervo
-        e a reconciliação global continuam sendo entregas separadas.
+        e guardar medidas e campos cadastrais históricos de origens reconciliadas,
+        sem criar avaliações atuais nem sobrescrever Cadastro Atual.
+        A carga inicial de todos os arquivos do acervo e a reconciliação global
+        continuam pendentes até o fornecimento e a verificação dos Excel e fotos.
       </Alert>
     </>
   );
