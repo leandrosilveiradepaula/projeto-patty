@@ -1,0 +1,17 @@
+.panel{display:grid;gap:15px;padding:20px;border:1px solid var(--color-border);border-radius:14px;background:var(--color-surface)}
+.panel h3{font-size:1.08rem}
+.panel p{max-width:74ch;color:var(--color-text-secondary);line-height:1.65;font-size:.9rem}
+.field{display:grid;gap:8px;max-width:570px;font-size:.9rem}
+.field select{width:100%;min-height:46px;border-radius:10px;border:1px solid var(--color-border);padding:10px;background:var(--color-surface)}
+.hint{font-size:.83rem}
+.hint a{font-weight:700;color:var(--color-brand-strong)}
+.check{display:flex;gap:10px;align-items:start;font-size:.9rem;line-height:1.6;max-width:80ch}
+.check input{flex:none;width:18px;height:18px;margin-top:3px;accent-color:var(--color-brand-strong)}
+.action{justify-self:start;min-height:46px;padding:10px 18px;border-radius:10px;border:1px solid var(--color-brand-strong);background:var(--color-brand-strong);color:#fff;font:700 .91rem var(--font-family-heading);cursor:pointer}
+.action:hover:not(:disabled){background:var(--color-brand)}
+.action:disabled{opacity:.5;cursor:not-allowed}
+.action:focus-visible,.field select:focus-visible,.check input:focus-visible{outline:3px solid var(--color-accent);outline-offset:3px}
+.receipt{display:grid;gap:13px;padding:17px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-surface-low)}
+.receipt code{overflow-wrap:anywhere}
+.receipt a{display:block;color:var(--color-brand-strong);font-weight:700;margin-top:9px}
+@media(max-width:650px){.action{width:100%}}
