@@ -71,7 +71,7 @@ export function reviewHistoricalFolderSelection(
     if(!entry||typeof entry.relativePath!=="string"||entry.relativePath.length>1024
       ||typeof entry.size!=="number"||!Number.isSafeInteger(entry.size)||entry.size<1)
       return errorsOnly("invalid_file");
-    const original=entry.relativePath;
+    const original:string=entry.relativePath;
     const parts=original.split("/");
     if(parts.length<3||parts.some(p=>!p||p==="."||p===".."||p.length>255||unsafe.test(p)))
       return errorsOnly("invalid_path");
