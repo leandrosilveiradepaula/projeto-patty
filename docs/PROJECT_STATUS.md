@@ -1,3 +1,15 @@
+## 2026-11-06 — MIGR-HIST-18C: planilhas Excel adicionais em subpastas de uma cliente (em validação)
+
+**Evidência real:** seleção da pasta original de uma cliente no painel admin produziu `ambiguous_mixed_folder_layout`. No parser vigente, isso ocorria quando havia ao menos um arquivo direto na pasta selecionada e outro Excel uma subpasta abaixo, independentemente do conteúdo. **Hipótese, não fato clínico:** existe Excel adicional em subpasta; a árvore real não foi exposta, nem houve leitura de dados. A regra de bloqueio impedia até o resumo do piloto.
+
+**Correção de escopo mínimo:** em uma pasta individual selecionada, manter o Excel diretamente na raiz como fonte principal apenas para contagem (nunca identidade ou importação) e contar cada Excel adicional aninhado como arquivo incompatível **com pendência explícita** `nested_excel_needs_review`. Nenhum Excel aninhado é associado automaticamente a avaliação, cliente, data ou registro; não é descartado do total. O resumo mostra contagens de fotos, Excel principal e planilhas em subpastas pendentes, sem nomes/caminhos/bytes. A pasta-mãe com várias clientes mantém o comportamento conhecido. A interface recomenda não mover ou apagar arquivos originais.
+
+**Segurança:** exclusivamente censo de metadados no navegador, sem upload, fetch, PII, alterações de schema/Auth/RLS/Storage, migrações ou revisão clínica. Testes sintéticos cobrem Excel principal + Excel aninhado e fotos por data, somente Excel aninhado sem principal, preservação de contagem e ausência de nomes/caminhos. A etapa final de guarda continua exigindo avaliação humana de identidade, semântica da origem e custódia antes de vincular registros ao banco.
+
+**Situações separadas:** alteração do censo ≠ Excel aceito na importação; ainda não há ingestão real deste piloto. Homologação conjunta J1–J7 continua última.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-18B: piloto com pasta de UMA cliente sem copiar arquivos (em validação)
 
 **Fato operacional confirmado:** o responsável optou por conferir uma cliente antes de selecionar o acervo de 6.453 arquivos, para evitar cópias e processamento desnecessários. A pasta original de cada cliente já contém Excel e fotos, inclusive subpastas datadas. Base inicial `master=92b24ce984a723ec9364406ca8dacfd4fae016c5`, com MIGR-HIST-18A integrado e Vercel READY. Cartão [#1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6686813078).
