@@ -88,9 +88,7 @@ export async function fingerprintHistoricalPilotFiles(
   for(const item of classification) {
     // Reading is intentionally sequential, only after the user clicks the
     // explicit button. Never retain the original File, name, or bytes.
-    let bytes:ArrayBuffer;
-    try{bytes=await item.file.arrayBuffer();}
-    catch{invalid();}
+    const bytes=await item.file.arrayBuffer().catch(()=>invalid());
     if(bytes.byteLength!==item.file.size||bytes.byteLength>item.maxBytes)invalid();
     const sha256=hex(await crypto.subtle.digest("SHA-256",bytes));
     found.push({sha256,kind:item.kind,location:item.location});
