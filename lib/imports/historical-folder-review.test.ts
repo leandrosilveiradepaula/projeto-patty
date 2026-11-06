@@ -124,3 +124,64 @@ test("unexpected archive formats remain counted as explicit pending items, never
   assert.equal(result.errors[0],"unsupported_files_present");
   assert.doesNotMatch(JSON.stringify(result),/CLIENT_HISTORY|scanned|\.pdf/);
 });
+
+
+test("selecting ONE existing client folder directly requires no copying or parent folder",()=>{
+  const selected=[
+    {relativePath:"PRIVATE_CLIENT_A/history.xlsx",size:2048},
+    {relativePath:"PRIVATE_CLIENT_A/front.jpg",size:3000},
+    {relativePath:"PRIVATE_CLIENT_A/15.08.2023/side.png",size:3001},
+    {relativePath:"PRIVATE_CLIENT_A/2024-09-16/back.jpeg",size:3002},
+  ];
+  const result=reviewHistoricalFolderSelection(selected);
+  assert.equal(result.state,"ready_for_local_review");
+  assert.equal(result.files,4);
+  assert.equal(result.excels,1);
+  assert.equal(result.photos,3);
+  assert.deepEqual(result.folders,[{
+    folder_index:1,excel_count:1,photo_count:3,proposed_date_count:2,
+  }]);
+  assert.deepEqual(result.photo_candidates.map(p=>p.proposed_date),
+    [null,"2023-08-15","2024-09-16"]);
+  assert.doesNotMatch(JSON.stringify(result),/PRIVATE_CLIENT_A|history|front|side|back/);
+});
+test("single client folder can show incomplete Excel or unsupported types as unresolved",()=>{
+  const result=reviewHistoricalFolderSelection([
+    {relativePath:"PRIVATE_CLIENT/initial.jpg",size:3000},
+    {relativePath:"PRIVATE_CLIENT/2022-09-14/photo.jpg",size:3000},
+    {relativePath:"PRIVATE_CLIENT/notes.pdf",size:100},
+  ]);
+  assert.equal(result.state,"review_with_issues");
+  assert.equal(result.files,3);
+  assert.equal(result.photos,2);
+  assert.equal(result.excels,0);
+  assert.equal(result.unsupported_count,1);
+  assert.equal(result.client_structure_issues,1);
+  assert.doesNotMatch(JSON.stringify(result),/PRIVATE_CLIENT|notes|photo/);
+});
+test("mixed root-level client files and deeper client spreadsheets do not masquerade as one client",()=>{
+  const result=reviewHistoricalFolderSelection([
+    {relativePath:"PRIVATE_ROOT/loose.xlsx",size:4000},
+    {relativePath:"PRIVATE_ROOT/CLIENT_B/historical.xlsx",size:4000},
+  ]);
+  assert.equal(result.state,"blocked");
+  assert.deepEqual(result.errors,["ambiguous_mixed_folder_layout"]);
+  assert.equal(result.folders.length,0);
+  assert.doesNotMatch(JSON.stringify(result),/PRIVATE_ROOT|CLIENT_B|loose/);
+});
+test("single-client direct select and full archive select both preserve pure metadata boundaries",()=>{
+  const direct=reviewHistoricalFolderSelection([
+    {relativePath:"PRIVATE_CLIENT/history.xlsx",size:100},
+    {relativePath:"PRIVATE_CLIENT/evolution/2023-01-05/img.jpg",size:200},
+  ]);
+  const full=reviewHistoricalFolderSelection([
+    {relativePath:"PRIVATE_ROOT/PRIVATE_CLIENT/history.xlsx",size:100},
+    {relativePath:"PRIVATE_ROOT/PRIVATE_CLIENT/evolution/2023-01-05/img.jpg",size:200},
+  ]);
+  assert.equal(direct.state,"ready_for_local_review");
+  assert.equal(full.state,"ready_for_local_review");
+  assert.deepEqual(direct.folders,full.folders);
+  assert.deepEqual(direct.photo_candidates,full.photo_candidates);
+  assert.equal(direct.bytes,full.bytes);
+  assert.equal(direct.photos,full.photos);
+});
