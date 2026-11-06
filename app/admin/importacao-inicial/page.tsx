@@ -7,7 +7,8 @@ import { HistoricalRegistrationFamilyBatchPanel } from "@/components/admin/Histo
 import { HistoricalAssessmentFamilyBatchPanel } from "@/components/admin/HistoricalAssessmentFamilyBatchPanel";
 import { isUuid } from "@/lib/validation/uuid";
 import { Section } from "@/components/ui/Section";
-import { Alert } from "@/components/ui/Alert";
+import { PageHeader } from "@/components/ui/PageHeader";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -21,49 +22,86 @@ export default async function InitialLoadAdminPage({ searchParams }: {
     ? Number(query.page) : 1;
 
   return (
-    <main>
-      <h1>Carga inicial do acervo</h1>
-      <Alert variant="info" title="Preparação e rastreabilidade">
-        Registre o inventário de todas as planilhas Excel e fotos da consultoria.
-        O arquivo JSON é gerado pela ferramenta local de inventário e contém
-        somente identificadores opacos e estados de triagem.
-      </Alert>
-      <Section title="Conferir pasta local de clientes e fotografias"
-        description="Selecione a pasta principal no computador e revise a organização e as sugestões de datas das fotos. Nenhum arquivo será enviado nesta prévia.">
-        <HistoricalFolderSelectionReview />
-      </Section>
-      <Section
-        title="Registrar inventário do lote"
-        description="Registre um lote por vez. A gravação confirma somente o recebimento dos metadados; não importa dados de saúde, clientes nem fotografias."
-      >
-        <HistoricalInitialLoadLedgerForm />
-      </Section>
-      <Section title="Lotes registrados e pendências" description="Consulte as origens de cada lote, os arquivos bloqueados ou sem vínculo e os totais para reconciliação.">
-        <HistoricalInitialLoadLedgerList batchId={batchId} page={page} />
-      </Section>
-      {batchId ? (
-        <Section title="Reconciliação integral por lote e domínio"
-          description="Consulta todas as origens, além da página atual, e compara recibos de Anamnese, avaliações, Cadastro Histórico e fotos.">
-          <HistoricalBatchReconciliationPanel batchId={batchId} />
-        </Section>
-      ) : null}
-      {batchId ? (
-        <Section title="Importar Cadastro Histórico por família de Excel"
-          description="Reutilize um mapa de células aprovado, confira os arquivos individualmente e guarde até cinco origens por rodada, sem substituir o Cadastro Atual.">
-          <HistoricalRegistrationFamilyBatchPanel batchId={batchId} />
-        </Section>
-      ) : null}
-      {batchId ? (
-        <Section title="Importar avaliações históricas por família de Excel"
-          description="Reutilize coordenadas e unidades aprovadas; informe e revise cada data real por origem. A guarda é exclusivamente histórica e privada.">
-          <HistoricalAssessmentFamilyBatchPanel batchId={batchId} />
-        </Section>
-      ) : null}
-      <Alert variant="warning" title="Ainda não é a importação definitiva">
-        Cada fonte deverá passar por conciliação humana de identidade,
-        mapeamento de campos, autorização de custódia e reconciliação.
-        Nenhuma cliente é ativada e nenhuma foto é liberada por esta etapa.
-      </Alert>
+    <main className={styles.page}>
+      <PageHeader
+        eyebrow="Clientes · organização inicial"
+        title="Importação de clientes"
+        description="Organize o histórico de clientes atuais e anteriores, incluindo planilhas e fotografias. Primeiro confira a pasta do computador; nenhum arquivo será enviado nesta etapa."
+      />
+      <section className={styles.step} aria-labelledby="folder-review-title">
+        <div className={styles.stepHeading}>
+          <span className={styles.stepNumber} aria-hidden="true">1</span>
+          <div>
+            <h2 id="folder-review-title" className={styles.stepTitle}>Selecionar e conferir a pasta</h2>
+            <p className={styles.stepDescription}>
+              Selecione uma vez a pasta principal que contém as pastas de cada cliente.
+              O sistema fará a conferência inicial dos Excel e das fotos, inclusive as organizadas por data.
+            </p>
+          </div>
+          <span className={styles.localStatus}>Conferência local</span>
+        </div>
+        <div className={styles.stepBody}>
+          <HistoricalFolderSelectionReview />
+        </div>
+      </section>
+      <section className={styles.nextStep} aria-labelledby="next-step-title">
+        <span className={styles.nextStepNumber} aria-hidden="true">2</span>
+        <div>
+          <h2 id="next-step-title">Importação definitiva</h2>
+          <p>
+            Ainda em preparação: antes de gravar os dados, será necessário conferir
+            a identidade das clientes, os conteúdos das planilhas e as datas das fotos.
+            As informações permanecerão privadas e nada será liberado automaticamente.
+          </p>
+        </div>
+        <span className={styles.pendingStatus}>Ainda não disponível</span>
+      </section>
+      <details className={styles.advanced} open={!!batchId}>
+        <summary>Ferramentas avançadas de importação</summary>
+        <div className={styles.advancedContent}>
+          <p className={styles.advancedIntro}>
+            Área técnica para lotes já preparados. O inventário JSON é gerado por
+            uma ferramenta separada, não pela seleção de pasta acima.
+            Não selecione fotos nem planilhas neste campo.
+          </p>
+          <Section
+            title="Registrar inventário técnico"
+            description="Registre somente o manifesto JSON produzido pela ferramenta local. Isso não importa conteúdo de clientes."
+          >
+            <HistoricalInitialLoadLedgerForm />
+          </Section>
+          <Section
+            title="Consultar lotes e pendências"
+            description="Veja os arquivos já inventariados e os registros pendentes de conferência."
+          >
+            <HistoricalInitialLoadLedgerList batchId={batchId} page={page} />
+          </Section>
+          {batchId ? (
+            <Section
+              title="Reconciliação do lote"
+              description="Compare as origens de arquivos e os recibos privados existentes."
+            >
+              <HistoricalBatchReconciliationPanel batchId={batchId} />
+            </Section>
+          ) : null}
+          {batchId ? (
+            <Section
+              title="Cadastro histórico por modelo de planilha"
+              description="Requer conferência por origem, sem substituir o Cadastro Atual."
+            >
+              <HistoricalRegistrationFamilyBatchPanel batchId={batchId} />
+            </Section>
+          ) : null}
+          {batchId ? (
+            <Section
+              title="Avaliações históricas por modelo de planilha"
+              description="Requer datas e medidas confirmadas por origem, antes da guarda privada."
+            >
+              <HistoricalAssessmentFamilyBatchPanel batchId={batchId} />
+            </Section>
+          ) : null}
+        </div>
+      </details>
     </main>
   );
 }
