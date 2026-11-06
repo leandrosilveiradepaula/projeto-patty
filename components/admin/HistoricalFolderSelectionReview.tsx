@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import styles from "./HistoricalFolderSelectionReview.module.css";
 import {fingerprintHistoricalPilotFiles,type HistoricalPilotFingerprint} from "@/lib/imports/historical-pilot-local-digest";
+import {HistoricalPilotVerifiedRegistration,type PilotClientChoice} from "./HistoricalPilotVerifiedRegistration";
 import {
   isValidHistoricalPhotoDate,
   reviewHistoricalFolderSelection,
@@ -24,7 +25,7 @@ const emptyFolder=():FolderChoice=>({sameClient:false,custody:false});
  * It never invokes the import API and never persists paths, dates or images.
  * The authoritative ledger, identity association and uploads are distinct steps.
  */
-export function HistoricalFolderSelectionReview() {
+export function HistoricalFolderSelectionReview({clientChoices}:Readonly<{clientChoices:readonly PilotClientChoice[]}>) {
   const [review,setReview]=useState<HistoricalFolderReview|null>(null);
   const [photoChoices,setPhotoChoices]=useState<Record<number,PhotoChoice>>({});
   const [folderChoices,setFolderChoices]=useState<Record<number,FolderChoice>>({});
@@ -212,6 +213,9 @@ export function HistoricalFolderSelectionReview() {
           <p>Essa referência não é autorização, identificação da cliente, recibo de
             importação nem confirmação das datas das fotos.</p>
         </div>:null}
+        {fingerprint?<HistoricalPilotVerifiedRegistration
+          key={fingerprint.inventory_sha256} files={filesRef.current}
+          fingerprint={fingerprint} clientChoices={clientChoices}/>:null}
         {(review.files>1200||review.bytes>300*1024*1024||folders.length!==1
           ||review.unsupported_count!==review.nested_excel_count
           ||review.client_structure_issues!==0||review.oversize_count!==0
