@@ -93,7 +93,7 @@ function receiptStatus(source: HistoricalBatchSource, records: readonly Historic
       || (domain === "assessments"
         && (r.layout_signature_sha256 !== source.layout_signature_sha256
           || typeof r.assessed_on !== "string"
-          || !/^\\d{4}-\\d{2}-\\d{2}$/.test(r.assessed_on)
+          || !/^\d{4}-\d{2}-\d{2}$/.test(r.assessed_on)
           || dates.has(r.assessed_on)))
       || ((domain === "anamnesis" || domain === "registration")
         && r.layout_signature_sha256 !== undefined
