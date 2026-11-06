@@ -157,7 +157,7 @@ test("single client folder can show incomplete Excel or unsupported types as unr
   assert.equal(result.excels,0);
   assert.equal(result.unsupported_count,1);
   assert.equal(result.client_structure_issues,1);
-  assert.doesNotMatch(JSON.stringify(result),/PRIVATE_CLIENT|notes\\.pdf|2022-09-14\\/photo\\.jpg/);
+  assert.doesNotMatch(JSON.stringify(result),/PRIVATE_CLIENT|notes|2022-09-14\\/);
 });
 test("mixed root-level client files and deeper client spreadsheets do not masquerade as one client",()=>{
   const result=reviewHistoricalFolderSelection([
