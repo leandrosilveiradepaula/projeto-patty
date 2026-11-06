@@ -53,7 +53,8 @@ export function makeVerifiedHistoricalPilotPlan(
   fingerprint.sources.forEach(s=>counts.set(s.sha256,(counts.get(s.sha256)??0)+1));
   const files:InitialLoadFile[]=fingerprint.sources.map(source=>{
     const meta=verified.get(source.source_id);
-    if(!meta||meta.sha256!==source.sha256||meta.kind!==source.kind)invalid();
+    if(!meta)invalid();
+    if(meta.sha256!==source.sha256||meta.kind!==source.kind)invalid();
     const duplicate=(counts.get(source.sha256)??0)>1;
     if(duplicate!==source.duplicate_binary)invalid();
     const shared={
