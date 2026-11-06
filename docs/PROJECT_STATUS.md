@@ -1,3 +1,15 @@
+## 2026-11-06 — MIGR-HIST-14A: Cadastro Histórico por família XLSX com revisão de cada origem (em CI)
+
+**Base:** `master=ba129bf6e8e0b6348fc7a513931dc330a48c60fa`, PR #1102 mergeada e CI pós-merge #42155092312 aprovada. Cartão operacional na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6676538577). Ledger 08B aplicado no SaaS, mas migrations 09A/10A/11B/12A seguem pendentes de apply protegido; não aplicar por SQL ad hoc.
+
+**Entrega:** reuso do endpoint admin AAL2 `POST /api/admin/clients/[clientId]/historical-excel` em operações `review_registration` e `stage_registration` já testadas. Nova seção de `/admin/importacao-inicial` aceita um mapa técnico JSON estrito `historical-registration-family-v1` contendo somente assinatura de layout e coordenadas para `city`/`phone`/`contact_email`/`instagram`, sem dados pessoais, nomes ou IDs de clientes. O servidor obtém o **inventário completo** e metadados de recibos sob sessão/RLS admin MFA AAL2 e bloqueia lote divergente/indisponível, fontes não associadas/bloqueadas, conflito e Cadastro Histórico já guardado. A interface vincula cada Excel pelo SHA do inventário, exige 3 atestações humanas independentes por origem e uma prévia no servidor, e só depois guarda **sequencialmente até 5 arquivos** por rodada, mostrando recibos individuais e permitindo nova triagem das fontes bloqueadas. A rota/servidor revalidam layout/SHA/Client/ledger, custódia e proposta; nunca cria/atualiza Cadastro Atual, Auth, Profile ou ativação, nem expõe dados históricos à cliente.
+
+**Limites verificáveis:** mapear layout não confirma conteúdo ou identidade; cada Excel exige revisão semântica e custódia humana; não há ZIP, upload em segundo plano nem ampliação de permissões. Nenhuma migration, RLS, schema, dependência ou API pública foi criada; nenhum dado real foi importado. Testes sintéticos verificam mapas inválidos/PII/células duplicadas, consulta completa/RLS, prévia separada da gravação e limites; typecheck/test:imports/segurança/build devem ser verdes na CI. Esta implementação ainda não é carga inicial concluída.
+
+**Próxima pendência:** fluxo por família de avaliações históricas com datas e unidades explicitamente revistas, seguido de carga real e reconciliação de 100% do acervo Excel + fotos assim que disponível/autorizado. Homologação conjunta J1–J7 será a última atividade.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-13A: reconciliação do lote integral por fonte e domínio (em CI)
 
 **Base confirmada:** `master=11b3f25388295f3a5704084cea9a761143ea97c8`, PR #1101 mergeada, [CI pós-merge #42153389693](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/42153389693) aprovada. Cartão operacional registrado na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6675734436). Histórico de Supabase SaaS tem ledger 08B aplicado, mas 09A (Anamnese), 10A (Fotos), 11B (medidas) e 12A (Cadastro Histórico) ainda não foram aplicadas; workflow de deploy em push opera dry-run e NÃO comprova aplicação.

@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/supabase/auth";
 import { HistoricalInitialLoadLedgerForm } from "@/components/admin/HistoricalInitialLoadLedgerForm";
 import { HistoricalInitialLoadLedgerList } from "@/components/admin/HistoricalInitialLoadLedgerList";
 import { HistoricalBatchReconciliationPanel } from "@/components/admin/HistoricalBatchReconciliationPanel";
+import { HistoricalRegistrationFamilyBatchPanel } from "@/components/admin/HistoricalRegistrationFamilyBatchPanel";
 import { isUuid } from "@/lib/validation/uuid";
 import { Section } from "@/components/ui/Section";
 import { Alert } from "@/components/ui/Alert";
@@ -38,6 +39,12 @@ export default async function InitialLoadAdminPage({ searchParams }: {
         <Section title="Reconciliação integral por lote e domínio"
           description="Consulta todas as origens, além da página atual, e compara recibos de Anamnese, avaliações, Cadastro Histórico e fotos.">
           <HistoricalBatchReconciliationPanel batchId={batchId} />
+        </Section>
+      ) : null}
+      {batchId ? (
+        <Section title="Importar Cadastro Histórico por família de Excel"
+          description="Reutilize um mapa de células aprovado, confira os arquivos individualmente e guarde até cinco origens por rodada, sem substituir o Cadastro Atual.">
+          <HistoricalRegistrationFamilyBatchPanel batchId={batchId} />
         </Section>
       ) : null}
       <Alert variant="warning" title="Ainda não é a importação definitiva">
