@@ -6,6 +6,7 @@ import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical
 import { reviewHistoricalDirectAnamnesisMapping, type HistoricalCellSelection } from "@/lib/imports/historical-direct-anamnesis-mapping";
 import { stageHistoricalAnamnesisSource } from "@/lib/imports/historical-anamnesis-server";
 import { reviewHistoricalAssessmentMeasurements, validateHistoricalMeasurementSelections } from "@/lib/imports/historical-assessment-review";
+import { stageHistoricalAssessmentSource } from "@/lib/imports/historical-assessment-server";
 import {
   extractHistoricalDirectXlsxCells,
   previewHistoricalDirectFiles,
@@ -111,6 +112,8 @@ export async function POST(
           ? ["operation", "excel", "sha256", "column_signature_sha256", "form_version_id", "mappings", "batch_id", "source_id", "confirmed_identity", "confirmed_mapping", "confirmed_custody"]
           : operation === "review_measurements"
             ? ["operation", "excel", "sha256", "column_signature_sha256", "assessed_on", "measurements", "confirmed_identity"]
+          : operation === "stage_measurements"
+            ? ["operation", "excel", "sha256", "column_signature_sha256", "assessed_on", "measurements", "proposal_sha256", "batch_id", "source_id", "confirmed_identity", "confirmed_mapping", "confirmed_custody"]
           : [];
   if (allowed.length === 0 || [...form.keys()].some((key) => !allowed.includes(key))
     || allowed.some((key) => form!.getAll(key).length !== 1)) {
@@ -147,7 +150,7 @@ export async function POST(
       || signature !== preview.excel.column_signature_sha256) {
       return response({ error: "excel_source_changed" }, 409);
     }
-    if (operation === "review_measurements") {
+    if (operation === "review_measurements" || operation === "stage_measurements") {
       if (form.get("confirmed_identity") !== "true") {
         return response({ error: "historical_measurement_identity_required" }, 400);
       }
@@ -171,7 +174,31 @@ export async function POST(
         clientId: client.id, sourceSha256: sha256, layoutSha256: signature,
         assessedOn: on, cells: cells.cells, selections: selected,
       });
-      return response(review, review.state === "blocked" ? 422 : 200);
+      if (operation === "review_measurements") {
+        return response(review, review.state === "blocked" ? 422 : 200);
+      }
+      const batch = form.get("batch_id");
+      const sourceId = form.get("source_id");
+      const expectedHash = form.get("proposal_sha256");
+      if (typeof batch !== "string" || !isUuid(batch)
+        || typeof sourceId !== "string" || !/^source_[0-9]{4}$/.test(sourceId)
+        || typeof expectedHash !== "string" || !HASH.test(expectedHash)
+        || expectedHash !== review.proposal_sha256
+        || form.get("confirmed_mapping") !== "true"
+        || form.get("confirmed_custody") !== "true") {
+        return response({ error: "historical_assessment_confirmation_required" }, 400);
+      }
+      try {
+        const receipt = await stageHistoricalAssessmentSource({
+          batchId: batch, sourceId, clientId: client.id, excelBytes: bytes,
+          sourceSha256: sha256, layoutSha256: signature, assessedOn: on,
+          selections: selected, proposalSha256: expectedHash,
+          confirmedIdentity: true, confirmedMapping: true, confirmedCustody: true,
+        });
+        return response(receipt);
+      } catch {
+        return response({ error: "historical_assessment_stage_blocked" }, 422);
+      }
     }
     if (operation === "map" || operation === "stage") {
       const versionId = form.get("form_version_id");
