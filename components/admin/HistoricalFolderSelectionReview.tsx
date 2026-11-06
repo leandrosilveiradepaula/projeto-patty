@@ -58,7 +58,7 @@ export function HistoricalFolderSelectionReview() {
     const firstPath=files[0]?.webkitRelativePath;
     const firstFolder=firstPath?.split("/")[0]??"";
     if(firstFolder.length>0 && firstFolder.length<=255
-      && !/[\\\\\\u0000-\\u001f\\u007f]/.test(firstFolder)
+      && !Array.from(firstFolder).some(ch=>ch.charCodeAt(0)<32 || ch.charCodeAt(0)===127 || ch.charCodeAt(0)===92)
       && Array.from(files).every(file=>file.webkitRelativePath.startsWith(firstFolder+"/"))) {
       setSelectedFolderName(firstFolder);
     }
