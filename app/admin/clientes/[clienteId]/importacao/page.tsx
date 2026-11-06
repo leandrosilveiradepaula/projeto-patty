@@ -5,6 +5,7 @@ import { getPublishedHistoricalAnamnesisTargets } from "@/lib/imports/historical
 import { ClientWorkspaceHeader } from "@/components/admin/ClientWorkspaceHeader";
 import { ClientWorkspaceNav } from "@/components/admin/ClientWorkspaceNav";
 import { HistoricalExcelReviewForm } from "@/components/admin/HistoricalExcelReviewForm";
+import { HistoricalAssessmentReviewForm } from "@/components/admin/HistoricalAssessmentReviewForm";
 import { HistoricalAnamnesisStagedList } from "@/components/admin/HistoricalAnamnesisStagedList";
 import { AdminPrivateFileUploadForm } from "@/components/admin/AdminPrivateFileUploadForm";
 import { Section } from "@/components/ui/Section";
@@ -44,13 +45,17 @@ export default async function HistoricalClientImportPage({
       <Section title="2. Históricos de Anamnese guardados" description="Somente a administração pode consultar os registros; nenhum histórico é liberado para a cliente.">
         <HistoricalAnamnesisStagedList clientId={client.id} />
       </Section>
-      <Section title="3. Adicionar fotos à cliente" description="Escolha a categoria Foto. Cada imagem enviada fica vinculada a este cadastro interno, inclusive se a cliente estiver inativa. O envio é individual e mantém os arquivos ocultos até liberação explícita.">
+      <Section title="3. Conferir medidas de avaliação histórica" description="Prepare correspondências de células, unidade e data da avaliação. O resultado é uma proposta sem gravação, aguardando mapeamento e decisão profissional.">
+        <HistoricalAssessmentReviewForm clientId={client.id} />
+      </Section>
+      <Section title="4. Adicionar fotos à cliente" description="Escolha a categoria Foto. Cada imagem enviada fica vinculada a este cadastro interno, inclusive se a cliente estiver inativa. O envio é individual e mantém os arquivos ocultos até liberação explícita.">
         <AdminPrivateFileUploadForm clientId={client.id} />
       </Section>
       <Alert variant="warning" title="Carga inicial completa ainda pendente">
-        Esta página permite guardar Anamnese histórica de uma origem Excel reconciliada.
-        A carga inicial em lote, a importação de cadastro, medidas, avaliações e fotos de
-        todo o acervo e a reconciliação global continuam sendo entregas separadas.
+        Esta página permite guardar Anamnese histórica de uma origem Excel reconciliada
+        e conferir propostas de medidas, sem criar avaliações atuais.
+        A carga inicial de Cadastro Atual, medidas, avaliações e fotos do acervo
+        e a reconciliação global continuam sendo entregas separadas.
       </Alert>
     </>
   );
