@@ -23,7 +23,7 @@ export function parseRegistrationFamilyMapping(input: unknown): RegistrationFami
     || typeof map.column_signature_sha256 !== "string"
     || !HASH.test(map.column_signature_sha256)) invalid();
   const fields = validateHistoricalRegistrationSelections(map.fields);
-  if (!fields) invalid();
+  if (!fields) throw new Error("historical_registration_family_mapping_blocked");
   return {
     version: REGISTRATION_FAMILY_MAPPING_VERSION,
     column_signature_sha256: map.column_signature_sha256 as string,
