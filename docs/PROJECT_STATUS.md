@@ -1,3 +1,17 @@
+## 2026-11-06 — MIGR-HIST-16A: inventário offline por subpasta da cliente e fotos em pastas datadas (em validação)
+
+**Entrada real confirmada:** raiz da coleção → pasta de cada cliente → um Excel, fotos, outras subpastas (frequentemente com datas de evolução) com fotos. O script de inventário existente rejeitava qualquer subdiretório, e a experiência anterior não aceitava o acervo real sem reorganizá-lo. Cartão na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6685259593).
+
+**Entrega em branch:** `scripts/plan-historical-initial-load.ts` mantém o formato legado `excel/` e `fotos/` e também varre pastas reais de clientes com fotos em subpastas aninhadas, com limites de quantidade, profundidade, tamanho por arquivo e total, rejeição de links simbólicos e arquivos inesperados, sem ZIP. O plano final permanece `historical-initial-load-plan-v1` sem escrita, URLs, caminhos, nomes, IDs inferidos ou datas. Duplicidades por bytes são bloqueadas na lógica existente, não descartadas silenciosamente. Testes sintéticos de subpastas, fotos diretas, duplicatas, links, formato inválido e vazamento de nomes.
+
+**Cuidado temporal:** nomes de pastas datadas indicam contexto, não comprovam data real de foto/avaliação. O manifesto atual não armazena essas datas; **a associação cronológica para o histórico privado permanece pendente** de operação separada com revisão humana. Não declarar carga final nem integridade cronológica antes da entrega posterior. Nenhuma foto ou Excel real foi lido, enviado ou integrado por esta PR.
+
+**Ambiente:** master inicial `940d14b5cbb53292adbefcf1df0df4aa1b0a4cce`; quatro migrations privadas históricas 09A/10A/11B/12A já aplicadas no Supabase SaaS pelo workflow [#42162676190](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/42162676190); dry-run [#42218455483](https://github.com/leandrosilveiradepaula/projeto-patty/actions/runs/42218455483) confirmou base atualizada. Estados de CI/merge/publicação/homologação desta entrega ainda aguardam evidências.
+
+**Próxima pendência:** escolha de pasta pelo administrador no navegador e conferência de datas por foto, com contagens e custódia; só depois guarda real do acervo integral autorizado e reconciliação. Homologação J1–J7 por último.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-15A: avaliações históricas por família XLSX e múltiplas datas (em validação)
 
 **Base auditada:** `master=6d0b11725b261bfb62a36c15802a6202637b9c3a` (PR #1103 integrada). Cartão operacional na [issue #1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6676788136). Checkout local indisponível nesta sessão; alterações feitas em branch GitHub, não na `master` sem CI. Migrations 09A/10A/11B/12A seguem pendentes de aplicação protegida; verificar o SaaS antes de declarar alteração de estado.
