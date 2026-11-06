@@ -148,7 +148,7 @@ export function HistoricalFolderSelectionReview() {
                 </label>:null}
                 <label>
                   <input type="checkbox" checked={d.confirmed}
-                    disabled={!valid||d.mode==="pending"}
+                    disabled={!valid}
                     onChange={e=>setPhotoChoices(prev=>({
                       ...prev,[photo.index]:{...(prev[photo.index]??emptyDate()),
                         confirmed:e.target.checked},
