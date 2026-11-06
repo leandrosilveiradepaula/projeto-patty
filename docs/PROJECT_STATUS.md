@@ -1,3 +1,13 @@
+## 2026-11-06 — MIGR-HIST-17B: carga inicial com ação principal compreensível (UX impeditiva, em CI)
+
+**Motivo / evidência:** responsável abriu a tela administrativa publicada de carga inicial (PR #1106, `master=d0a1336c`) e mostrou uma captura com duas escolhas de arquivos igualmente expostas (pasta e JSON técnico), instruções extensas e pouca hierarquia, sem distinção funcional entre conferência e importação real. Isto bloqueia o uso confiável e pode induzir erro com dados de saúde. Cartão [#1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6685948253).
+
+**Entrega em branch:** página agora possui cabeçalho institucional e fluxo em duas etapas visuais: (1) CTA explícita **Selecionar pasta principal**, conferência *local* e contagens claras de grupos, Excel e fotos; (2) **Importação definitiva ainda não disponível**, explicando os gates pendentes. O seletor nativo sem destaque vira rótulo clicável acessível com foco de teclado, usando tokens de design existentes. Revisão individual das fotos fica opcional em seção recolhida, com aviso de que marcações não são guardadas. Ferramentas JSON, listagem de lotes e operações por família passam a seção **Ferramentas avançadas de importação**, recolhida por padrão e aberta ao navegar com `?batch=UUID`, para preservar fluxos já existentes.
+
+**Segurança e limites:** nenhuma alteração de `requireRole("admin")`/MFA AAL2, endpoints, backend, storage, tabelas, RLS, migrations ou permissões; nenhuma imagem/Excel real carregado, upload feito ou Client criado. Continuidade do trabalho principal é a conexão do seletor ao manifesto autenticado e à importação real, com identidade e datas confirmadas por origem. Não declarar carga concluída por melhorar UI. Testes do contrato de fluxo/ocultação de JSON, ausência de rede, e CI no commit exato; validação visual manual e publicação são estados separados.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-17A: selecionar pasta principal e revisar cronologia das fotos no navegador (em validação)
 
 **Dependência comprovada:** o script offline MIGR-HIST-16A reconhece `raiz/pasta-cliente/Excel + fotos + pastas de datas`, mas a interface administrativa de carga inicial exigia importar JSON externo. A estrutura física do acervo foi confirmada pelo responsável. Cartão operacional [#1008](https://github.com/leandrosilveiradepaula/projeto-patty/issues/1008#issuecomment-6685491838). Base inicial `master=ce430fece4054c923d527644975fee7d86c5a8cc`, PR #1105 integrada com CI pós-merge verde.
