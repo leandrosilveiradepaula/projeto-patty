@@ -55,18 +55,18 @@ test("unsupported paths, nested Excel, missing/multiple Excel, root mismatch fai
     assert.doesNotMatch(JSON.stringify(result),/PRIVATE_|clinical|medical|\.xlsx/);
   }
 });
-test("file and total budgets and photo folder depth are bounded",()=>{
+test("oversize, unusual depth and many files are explicit inventory issues",()=>{
   assert.equal(reviewHistoricalFolderSelection([
     {relativePath:"ROOT/A/one.xlsx",size:20*1024*1024+1},
   ]).state,"review_with_issues");
   assert.equal(reviewHistoricalFolderSelection([
     {relativePath:"ROOT/A/one.xlsx",size:1},
     {relativePath:"ROOT/A/img.jpg",size:10*1024*1024+1},
-  ]).state,"blocked");
+  ]).state,"review_with_issues");
   const deep="ROOT/A/"+Array.from({length:9},(_,i)=>"part"+i).join("/")+"/img.png";
   assert.equal(reviewHistoricalFolderSelection([
     {relativePath:"ROOT/A/one.xlsx",size:1},{relativePath:deep,size:1},
-  ]).state,"blocked");
+  ]).state,"review_with_issues");
   const many=Array.from({length:1201},(_,i)=>({
     relativePath:`ROOT/PERSON/asset${i}.jpg`,size:1,
   }));
