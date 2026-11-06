@@ -12,7 +12,7 @@ export type HistoricalFolderGroup = Readonly<{
 export type HistoricalFolderReview = Readonly<{
   state:"ready_for_local_review"|"review_with_issues"|"blocked";
   files:number;excels:number;photos:number;bytes:number;
-  unsupported_count:number;oversize_count:number;client_structure_issues:number;
+  unsupported_count:number;nested_excel_count:number;oversize_count:number;client_structure_issues:number;
   photo_candidates_truncated:boolean;
   folders:readonly HistoricalFolderGroup[];
   photo_candidates:readonly HistoricalFolderPhoto[];
@@ -29,7 +29,7 @@ const unsafe=/[\\\u0000-\u001f\u007f]/;
 const SAFE_DATE=/^\d{4}-\d{2}-\d{2}$/;
 function blocked(reason:string,count=0):HistoricalFolderReview {
   return {state:"blocked",files:count,excels:0,photos:0,bytes:0,
-    unsupported_count:0,oversize_count:0,client_structure_issues:0,
+    unsupported_count:0,nested_excel_count:0,oversize_count:0,client_structure_issues:0,
     photo_candidates_truncated:false,folders:[],photo_candidates:[],errors:[reason]};
 }
 export function isValidHistoricalPhotoDate(date:string):boolean {
@@ -68,7 +68,7 @@ export function reviewHistoricalFolderSelection(
   const groupsByName=new Map<string,MutableGroup>();
   const seen=new Set<string>();
   const photos: Array<{folder:string;date:string|null}>=[];
-  let root:string|null=null,excels=0,photoCount=0,bytes=0,unsupported=0,oversize=0;
+  let root:string|null=null,excels=0,photoCount=0,bytes=0,unsupported=0,nestedExcels=0,oversize=0;
   for(const entry of entries){
     if(!entry||typeof entry.relativePath!=="string"||entry.relativePath.length>2048
       ||typeof entry.size!=="number"||!Number.isSafeInteger(entry.size)||entry.size<0)
@@ -83,8 +83,6 @@ export function reviewHistoricalFolderSelection(
     seen.add(original);
     bytes+=entry.size;
     if(!Number.isSafeInteger(bytes))return blocked("invalid_total_bytes",entries.length);
-    if(singleClient&&XLSX.test(parts[parts.length-1]!)&&parts.length===3)
-      return blocked("ambiguous_mixed_folder_layout",entries.length);
     const folder=singleClient?parts[0]!:parts[1]!;
     const filename=parts[parts.length-1]!;
     const excelDepth=singleClient?2:3;
@@ -105,8 +103,10 @@ export function reviewHistoricalFolderSelection(
       if(date)group.proposed_date_count++;
       if(photos.length<MAX_PHOTO_CANDIDATES)photos.push({folder,date});
     }else{
-      // Unrecognized extensions, nested Excel, and excess depth are counted,
-      // NOT uploaded, silently discarded or treated as valid import sources.
+      // Count nested Excel separately as a review issue: this is common in real
+      // archives but cannot be assigned to an assessment automatically.
+      // Never drop it or treat it as an approved principal spreadsheet.
+      if(XLSX.test(filename))nestedExcels++;
       unsupported++;
     }
   }
@@ -121,12 +121,13 @@ export function reviewHistoricalFolderSelection(
   }));
   const errors:string[]=[];
   if(unsupported)errors.push("unsupported_files_present");
+  if(nestedExcels)errors.push("nested_excel_needs_review");
   if(oversize)errors.push("files_exceed_import_limits");
   if(structureIssues)errors.push("client_folders_require_review");
   return {
     state:errors.length?"review_with_issues":"ready_for_local_review",
     files:entries.length,excels,photos:photoCount,bytes,
-    unsupported_count:unsupported,oversize_count:oversize,
+    unsupported_count:unsupported,nested_excel_count:nestedExcels,oversize_count:oversize,
     client_structure_issues:structureIssues,
     photo_candidates_truncated:photoCount>MAX_PHOTO_CANDIDATES,
     folders,photo_candidates:photoCandidates,errors,
