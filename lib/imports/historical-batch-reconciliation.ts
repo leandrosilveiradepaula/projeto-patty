@@ -76,7 +76,7 @@ const isUsable = (s: HistoricalBatchSource): boolean =>
   s.state === "pending_backend_identity_verification" && !!s.proposed_client_id
   && uuidRE.test(s.proposed_client_id) && sourceRE.test(s.source_id)
   && shaRE.test(s.source_sha256);
-const initialBlocked = (s: HistoricalBatchSource) =>
+const initialBlocked = (s: Pick<HistoricalBatchSource, "state">) =>
   s.state === "blocked" || s.state === "duplicate_binary";
 
 function receiptStatus(source: HistoricalBatchSource, records: readonly HistoricalBatchReceipt[],
