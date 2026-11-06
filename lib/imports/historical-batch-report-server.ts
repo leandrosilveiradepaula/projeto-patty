@@ -52,16 +52,16 @@ export async function getHistoricalBatchReconciliation(
       {count:"exact"}).eq("batch_id",batchId);
   const anamnesisQuery=db.from("historical_anamnesis_imports")
     .select("id,source_id,client_id,source_sha256,state,layout_signature_sha256",
-      {count:"exact"}).eq("batch_id",batchId);
+      {count:"exact"}).eq("batch_id",batchId).order("id",{ascending:true});
   const assessmentQuery=db.from("historical_assessment_imports")
     .select("id,source_id,client_id,source_sha256,state,layout_signature_sha256,assessed_on",
-      {count:"exact"}).eq("batch_id",batchId);
+      {count:"exact"}).eq("batch_id",batchId).order("id",{ascending:true});
   const registrationQuery=db.from("historical_registration_imports")
     .select("id,source_id,client_id,source_sha256,state,layout_signature_sha256",
-      {count:"exact"}).eq("batch_id",batchId);
+      {count:"exact"}).eq("batch_id",batchId).order("id",{ascending:true});
   const photoQuery=db.from("historical_photo_imports")
     .select("id,source_id,client_id,source_sha256,state",
-      {count:"exact"}).eq("batch_id",batchId);
+      {count:"exact"}).eq("batch_id",batchId).order("id",{ascending:true});
   const [sources,anamnesis,assessments,registration,photos]=await Promise.all([
     allRows(sourcesQuery,BATCH_SOURCE_LIMIT),
     allRows(anamnesisQuery,MAX_RECEIPTS.anamnesis),
