@@ -51,3 +51,23 @@ test("privacy gates and honest ephemeral preview are not weakened",()=>{
   assert.doesNotMatch(picker,/fetch\(|createAdminClient|localStorage|sessionStorage|console\.|indexedDB|\.storage\./);
   assert.doesNotMatch(page,/service_role|createAdminClient/);
 });
+
+
+test("selected folder label is local only, toggled for private screenshots and never promoted to identity",()=>{
+  assert.match(picker,/const \[selectedFolderName,setSelectedFolderName\]=useState/);
+  assert.match(picker,/const \[hideFolderName,setHideFolderName\]=useState/);
+  assert.match(picker,/files\[0\]\?\.webkitRelativePath/);
+  assert.match(picker,/firstPath\?\.split\("\/"\)\[0\]/);
+  assert.match(picker,/setSelectedFolderName\(null\)/);
+  assert.match(picker,/setSelectedFolderName\(firstFolder\)/);
+  assert.match(picker,/hideFolderName\?"Nome oculto para privacidade":selectedFolderName/);
+  assert.match(picker,/aria-pressed=\{hideFolderName\}/);
+  assert.match(picker,/Ocultar nome/);
+  assert.match(picker,/nome fornecido pelo navegador/i);
+  assert.match(picker,/não o caminho completo do computador/i);
+  assert.match(picker,/Nenhum arquivo foi importado/);
+  assert.match(pickerStyles,/\.folderIdentity/);
+  assert.match(pickerStyles,/\.folderPrivacyButton:focus-visible/);
+  assert.doesNotMatch(picker,/fetch\(|console\.|localStorage|sessionStorage|sendBeacon|indexedDB/);
+  assert.doesNotMatch(picker,/client_id|createClient|window\.location|\.storage\./);
+});

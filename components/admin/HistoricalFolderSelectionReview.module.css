@@ -146,3 +146,43 @@
   .stats { grid-template-columns: 1fr; }
   .pickerButton { width: 100%; }
 }
+
+.folderIdentity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-low);
+}
+.folderIdentityText { min-width: 0; flex: 1; display: grid; gap: 5px; }
+.folderIdentityText strong { font-size: .875rem; }
+.folderName {
+  color: var(--color-brand-strong);
+  font-weight: 750;
+  font-size: 1.08rem;
+  overflow-wrap: anywhere;
+}
+.folderNote {
+  color: var(--color-text-secondary);
+  font-size: .82rem;
+  line-height: 1.55;
+}
+.folderPrivacyButton {
+  flex: none;
+  background: var(--color-surface);
+  color: var(--color-brand-strong);
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font: 700 .83rem var(--font-family-heading);
+  cursor: pointer;
+}
+.folderPrivacyButton:hover { background: var(--color-surface-high); }
+.folderPrivacyButton:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}

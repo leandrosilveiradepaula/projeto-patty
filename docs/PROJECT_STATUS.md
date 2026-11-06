@@ -1,3 +1,13 @@
+## 2026-11-06 — MIGR-HIST-18D: identificação local da pasta selecionada para conferência (em CI)
+
+**Evidência:** piloto real de uma cliente enumerou 16 arquivos (1 Excel na raiz, 12 fotos, 3 Excel adicionais aninhados em revisão), mas a interface não informava a pasta selecionada. O responsável solicitou que o endereço aparecesse. Navegadores não fornecem o caminho absoluto do disco no seletor `webkitdirectory`, apenas a raiz de `webkitRelativePath`, metadado potencialmente identificador da cliente. Cartão de execução registrado na issue #1008 antes da implementação.
+
+**Entrega em branch:** o painel exibe **Pasta selecionada** com o nome da raiz informado pelo navegador, **somente no estado local da UI**, imediatamente após escolher arquivos, sem inferir vínculo a `Client`. Botão com `aria-pressed` alterna **Ocultar nome / Mostrar nome** para preservar privacidade em prints; o nome não aparece em título, URL ou log quando oculto. Cancelar/nova seleção limpa o estado. Texto informa que não se trata do endereço absoluto nem de importação. A função de inventário que retorna índices/contagens continua sem nomes e sem caminhos.
+
+**Limites e segurança:** não há leitura de bytes de saúde, envio por rede, gravação, storage, JSON, identidade automática, migration, Auth/RLS ou mudança no staging. Dados reais não entram no repositório/CI. Testes de interface/privacidade, typecheck, import regression/security e build no SHA antes de merge. Próxima prioridade permanece conectar o piloto à criação segura de inventário com hash, custódia, identidade revisada e staging de 1 cliente, seguido de reconciliação de todo o acervo. Homologação final J1–J7 por último.
+
+---
+
 ## 2026-11-06 — MIGR-HIST-18C: planilhas Excel adicionais em subpastas de uma cliente (em validação)
 
 **Evidência real:** seleção da pasta original de uma cliente no painel admin produziu `ambiguous_mixed_folder_layout`. No parser vigente, isso ocorria quando havia ao menos um arquivo direto na pasta selecionada e outro Excel uma subpasta abaixo, independentemente do conteúdo. **Hipótese, não fato clínico:** existe Excel adicional em subpasta; a árvore real não foi exposta, nem houve leitura de dados. A regra de bloqueio impedia até o resumo do piloto.
